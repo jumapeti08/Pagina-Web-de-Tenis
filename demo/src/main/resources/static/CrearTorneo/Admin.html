@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Tenis</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <header>
+            <h1>🎾 Gestión de Torneos</h1>
+            <p>Bienvenido, Administrador</p>
+        </header>
+        <div class="menu-grid">
+            <div class="card-menu">
+                <div class="icon">📺</div>
+                <h2>Partidos</h2>
+                <div class="options">
+                    <button class="btn-opt" onclick="navegar('vivo')">
+                        <span class="dot"></span> Ver Partidos en Vivo
+                    </button>
+                    <button class="btn-opt" onclick="navegar('antiguos')">
+                        📂 Ver Partidos Antiguos
+                    </button>
+                </div>
+            </div>
+            <div class="card-menu">
+                <div class="icon">🏆</div>
+                <h2>Torneos</h2>
+                <div class="options">
+                    <button class="btn-opt primary" onclick="window.location.href='crear-torneo.html'">
+                        ➕ Crear Nuevo Torneo
+                    </button>
+                    <button class="btn-opt" onclick="navegar('editar')">
+                        ⚙️ Editar Torneo Existente
+                    </button>
+                </div>
+            </div>
+
+            <!-- Nueva Tarjeta para Gestión de Usuarios -->
+            <div class="card-menu">
+                <div class="icon">👥</div>
+                <h2>Usuarios</h2>
+                <div class="options">
+                    <form id="registroUsuarioForm" style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="newUsername" placeholder="Usuario" required 
+                               style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                        
+                        <input type="password" id="newPassword" placeholder="Contraseña" required 
+                               style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                        
+                        <select id="newRolId" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                            <option value="ADMINISTRADOR">Administrador</option>
+                            <option value="JUEZ">Juez</option>
+                            <option value="JUGADOR">Jugador</option>
+                        </select>
+
+                        <button type="submit" class="btn-opt primary" style="width: 100%;">
+                            👤 Registrar Nuevo
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Juez | Tenis</title>
+    <link rel="stylesheet" href="../CrearTorneo/admin-style.css">
+    <style>
+        :root {
+            --clay-orange: #C24E00;
+            --clay-bg: #1e1e1e;
+            --clay-card: #2d2d2d;
+            --clay-text: #ffffff;
+            --clay-accent: #d4f01e;
+            --clay-border: #444;
+            --danger-red: #d32f2f;
+        }
+        .tournament-card {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 6px solid var(--clay-orange);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .tournament-card:hover { transform: scale(1.02); }
+        .match-list { margin-left: 20px; border-left: 2px dashed #444; padding-left: 15px; }
+        .match-item {
+            background: #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-arbitrar {
+            background: var(--clay-orange);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-arbitrar:hover {
+            background: #e05b00;
+        }
+
+        /* DISEÑO DE FILTROS */
+        .filter-container {
+            background: #232323;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--clay-border);
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-around;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 200px;
+            flex: 1;
+        }
+        .filter-group label {
+            font-size: 0.9rem;
+            color: #aaa;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .filter-select {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid var(--clay-border);
+            color: white;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .filter-select:focus {
+            border-color: var(--clay-orange);
+        }
+        .filter-select:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎾 Panel de Arbitraje</h1>
+        <p style="text-align:center; color: #888; margin-bottom: 30px;">Selecciona los filtros para encontrar tus partidos asignados</p>
+        
+        <!-- SECCIÓN DE FILTROS EN CASCADA -->
+        <div class="filter-container">
+            <!-- 1. Filtro de Modalidad (Sencillos/Dobles) -->
+            <div class="filter-group">
+                <label for="filtroCategoria">1. Modalidad:</label>
+                <select id="filtroCategoria" class="filter-select" onchange="actualizarFiltroModalidad()">
+                    <option value="" selected disabled>-- Selecciona Modalidad --</option>
+                    <option value="Sencillos">Sencillos</option>
+                    <option value="Dobles">Dobles</option>
+                </select>
+            </div>
+
+            <!-- 2. Filtro de Clasificación (Se habilita tras elegir modalidad) -->
+            <div class="filter-group">
+                <label for="filtroClasificacion">2. Clasificación / Serie:</label>
+                <select id="filtroClasificacion" class="filter-select" id="filtroClasificacion" onchange="aplicarFiltroFinal()" disabled>
+                    <option value="" selected disabled>-- Selecciona Clasificación --</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="listaTorneos"></div>
+    </div>
+
+    <script src="panel-juez.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Jugador - SlamStats</title>
+    <link rel="stylesheet" href="dashboard-jugador.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon">
+                <i class="fa-solid fa-table-tennis-tennis"></i>
+            </div>
+            <span class="logo-text">Slam<span>Stats</span></span>
+        </div>
+
+        <div class="user-profile">
+            <div class="profile-avatar">
+                <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+            <div class="profile-info">
+                <p class="profile-name">Carlos Alcaraz</p>
+                <p class="profile-role">Jugador</p>
+            </div>
+        </div>
+
+        <nav class="sidebar-menu">
+            <ul>
+                <li class="active" onclick="seleccionarOpcion(this, 'mis-stats')">
+                    <a href="#">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span class="menu-text">Mis estadísticas</span>
+                    </a>
+                </li>
+                <li onclick="seleccionarOpcion(this, 'ver-torneos')">
+                    <a href="#">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span class="menu-text">Ver torneos</span>
+                    </a>
+                </li>
+                <li onclick="seleccionarOpcion(this, 'stats-otros')">
+                    <a href="#">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                        <span class="menu-text">Stats de otros</span>
+                    </a>
+                </li>
+                <li onclick="seleccionarOpcion(this, 'datos-personales')">
+                    <a href="#">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <span class="menu-text">Datos personales</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="menu-text">Cerrar Sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="content-header">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            
+            <h1 id="seccion-titulo">Mis Estadísticas</h1>
+            
+            <span class="status-badge"><i class="fa-solid fa-circle"></i> En Línea</span>
+        </header>
+
+        <section class="content-body" id="dynamic-container">
+            <div class="placeholder-card">
+                <i class="fa-solid fa-chart-line"></i>
+                <h2>¡Bienvenido, Carlos!</h2>
+                <p>Usa el botón de menú de la esquina superior izquierda para navegar por tu información.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="dashboard-jugador.js"></script>
+</body>
+</html>

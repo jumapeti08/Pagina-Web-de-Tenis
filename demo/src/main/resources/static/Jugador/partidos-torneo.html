@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SlamStats - Partidos del Torneo</title>
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="dashboard-jugador.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        .container-detalle { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        .btn-volver { background: #333; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
+        .btn-volver:hover { background: #444; }
+        
+        .ronda-seccion { margin-bottom: 30px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border-left: 4px solid #d4f01e; }
+        .ronda-titulo { color: #d4f01e; margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; }
+        
+        .partidos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        .partido-card { background: #222; border: 1px solid #333; padding: 12px; border-radius: 6px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+        .partido-card:hover { transform: translateY(-2px); border-color: #d4f01e; }
+        
+        /* Visor de Partido en Vivo / Detalle */
+        .match-viewer { display: none; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+        
+        /* Marcador Vertical (Puntos, Games, Sets) */
+        .vertical-scoreboard { display: flex; flex-direction: column; gap: 15px; background: #111; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .score-row-block { display: flex; flex-direction: column; align-items: center; background: #222; padding: 10px; border-radius: 6px; }
+        .block-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 5px; }
+        .block-values { display: flex; justify-content: space-around; width: 100%; font-size: 1.4rem; font-weight: bold; color: #fff; }
+        .block-values.highlight { color: #d4f01e; }
+        
+        /* Barras de estadísticas */
+        .stats-section { margin-top: 25px; border-top: 1px solid #333; padding-top: 15px; }
+        .stat-row { margin-bottom: 12px; }
+        .stat-labels { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; color: #ccc; }
+        .bar-track { display: flex; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
+        .bar-p1 { background: #d4f01e; transition: width 0.3s; }
+        .bar-p2 { background: #3498db; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+    <div class="container-detalle">
+        <button class="btn-volver" onclick="window.location.href='dashboard-jugador.html'">
+            <i class="fa-solid fa-arrow-left"></i> Volver a mis torneos
+        </button>
+
+        <h1 id="nombre-torneo" style="color: #fff;">Cargando Torneo...</h1>
+
+        <!-- Contenedor del visor de partido activo -->
+        <div id="match-viewer" class="match-viewer"></div>
+
+        <!-- Lista de rondas y sus partidos -->
+        <div id="rondas-container"></div>
+    </div>
+
+    <!-- Scripts de dependencias (WebSockets) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
+    <!-- Script principal de la vista (SE IMPORTA UNA SOLA VEZ AL FINAL) -->
+    <script src="partidos-torneo.js"></script>
+</body>
+</html>

@@ -1,0 +1,653 @@
+/* =========================================================================
+   VARIABLES DE DISEÑO (Roland Garros Theme - Polvo de Ladrillo)
+   ========================================================================= */
+:root {
+    --bg-dark: #121416;         /* Gris carbón profundo */
+    --bg-card: #1C1F22;         /* Gris de tarjetas */
+    --clay-primary: #C2512C;    /* Terracota / Polvo de ladrillo */
+    --clay-light: #E87740;      /* Naranja arcilla brillante */
+    --tennis-yellow: #CCFF00;   /* Amarillo pelota de tenis */
+    --text-main: #F4F5F6;       /* Blanco crema */
+    --text-muted: #8E9499;      /* Gris suave */
+    --sidebar-width: 280px;     /* Ancho en móviles cuando se despliega */
+    --transition-speed: 0.3s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* =========================================================================
+   BARRA LATERAL (SIDEBAR) - MOBILE FIRST
+   ========================================================================= */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--bg-card);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: calc(-1 * var(--sidebar-width)); /* Escondido a la izquierda */
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid rgba(194, 81, 44, 0.2);
+    transition: left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.sidebar.active {
+    left: 0; /* Desliza hacia adentro */
+}
+
+/* Botón de hamburguesa */
+.toggle-btn {
+    background-color: var(--clay-primary);
+    color: var(--text-main);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background var(--transition-speed);
+}
+
+.toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* Cabecera Sidebar */
+.sidebar-header {
+    padding: 20px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo-icon {
+    font-size: 22px;
+    color: var(--clay-light);
+}
+
+.logo-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.logo-text span {
+    color: var(--clay-light);
+}
+
+/* Perfil de Usuario */
+.user-profile {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.profile-avatar {
+    width: 42px;
+    height: 42px;
+    background-color: rgba(194, 81, 44, 0.1);
+    border: 2px solid var(--clay-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--clay-light);
+}
+
+.profile-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.profile-role {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* Menú de Opciones */
+.sidebar-menu {
+    flex-grow: 1;
+    padding: 15px 0;
+}
+
+.sidebar-menu ul {
+    list-style: none;
+}
+
+.sidebar-menu li {
+    margin: 4px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    gap: 15px;
+    border-radius: 8px;
+}
+
+.sidebar-menu li i {
+    font-size: 18px;
+    min-width: 25px;
+    text-align: center;
+}
+
+.sidebar-menu li:hover,
+.sidebar-menu li.active {
+    background-color: rgba(194, 81, 44, 0.15);
+}
+
+.sidebar-menu li:hover a,
+.sidebar-menu li.active a {
+    color: var(--text-main);
+}
+
+.sidebar-menu li.active i {
+    color: var(--clay-light);
+}
+
+/* Footer / Cerrar Sesión */
+.sidebar-footer {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 500;
+    gap: 15px;
+    border-radius: 8px;
+}
+
+/* Fondo translúcido (Overlay) */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
+    z-index: 999;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition-speed) ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* =========================================================================
+   CONTENIDO PRINCIPAL
+   ========================================================================= */
+.main-content {
+    margin-left: 0;
+    flex-grow: 1;
+    padding: 15px;
+    width: 100%;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+}
+
+.content-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.status-badge {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* =========================================================================
+   ESTADÍSTICAS & ANIMACIÓN DE TENIS
+   ========================================================================= */
+@keyframes tennisBounce {
+    0%, 100% { transform: translateY(0) scale(1, 1); animation-timing-function: ease-in; }
+    40% { transform: translateY(-30px) scale(0.95, 1.05); animation-timing-function: ease-out; }
+    50% { transform: translateY(0) scale(1.1, 0.85); }
+    60% { transform: translateY(-10px) scale(0.98, 1.02); animation-timing-function: ease-out; }
+}
+
+@keyframes fadeInUpCard {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Spinner de Pelota Rebotando */
+.tennis-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px 20px;
+}
+
+.tennis-ball-animated {
+    width: 45px;
+    height: 45px;
+    background-color: var(--tennis-yellow);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: inset -4px -4px 8px rgba(0,0,0,0.4), 0 0 15px rgba(204, 255, 0, 0.4);
+    animation: tennisBounce 1.2s infinite;
+}
+
+.tennis-ball-animated::before,
+.tennis-ball-animated::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    box-sizing: border-box;
+}
+
+.tennis-ball-animated::before { top: -20%; left: -30%; }
+.tennis-ball-animated::after { top: 20%; left: 30%; }
+
+.tennis-loader p {
+    margin-top: 25px;
+    color: var(--text-muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+    font-weight: 600;
+}
+
+/* Tarjetas de Estadísticas */
+.stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    animation: fadeInUpCard 0.4s ease-out forwards;
+}
+
+.hero-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.hero-card {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: var(--clay-primary);
+}
+
+.hero-card.win::before { background: #2ecc71; }
+.hero-card.loss::before { background: #e74c3c; }
+.hero-card.rate::before { background: var(--tennis-yellow); }
+
+.hero-card i {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: var(--clay-light);
+}
+
+.hero-card.win i { color: #2ecc71; }
+.hero-card.loss i { color: #e74c3c; }
+.hero-card.rate i { color: var(--tennis-yellow); }
+
+.hero-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.hero-value {
+    font-size: 26px;
+    font-weight: 800;
+    margin-top: 4px;
+    color: var(--text-main);
+}
+
+.section-subtitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-subtitle i {
+    color: var(--clay-light);
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.metric-card {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform var(--transition-speed), border-color var(--transition-speed);
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--clay-primary);
+}
+
+.metric-info p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.metric-avg {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 4px 0;
+    color: var(--tennis-yellow);
+}
+
+.metric-avg small {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.metric-total-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.metric-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(194, 81, 44, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--clay-light);
+}
+
+/* =========================================================================
+   ESTILOS PARA EL BUSCADOR DE JUGADORES
+   ========================================================================= */
+.search-section {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.search-box-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+}
+
+.search-box-wrapper input {
+    width: 100%;
+    padding: 14px 16px 14px 45px;
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.search-box-wrapper input:focus {
+    border-color: var(--clay-primary);
+    box-shadow: 0 0 10px rgba(194, 81, 44, 0.3);
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+/* Desplegable de Resultados */
+.search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    width: 100%;
+    background-color: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    z-index: 100;
+    max-height: 250px;
+    overflow-y: auto;
+    display: none;
+}
+
+.search-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    color: var(--text-main);
+    font-size: 14px;
+    transition: background-color var(--transition-speed);
+}
+
+.search-item i {
+    color: var(--clay-light);
+}
+
+.search-item:hover {
+    background-color: rgba(194, 81, 44, 0.15);
+}
+
+.search-item-empty {
+    padding: 12px 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* Estilos para Torneos y Marcadores */
+.filters-card {
+    display: flex;
+    gap: 20px;
+    background: #1e1e1e;
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    border: 1px solid #333;
+}
+
+.filter-group select {
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 8px 12px;
+    border-radius: 6px;
+    outline: none;
+}
+
+/* Marcador en Vivo */
+.scoreboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #181818;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.scoreboard-table th, .scoreboard-table td {
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.scoreboard-table .highlight {
+    background: rgba(211, 84, 0, 0.2);
+    color: #d35400; /* Color Arcilla */
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Barras Comparativas de Estadísticas */
+.stat-row {
+    margin-bottom: 18px;
+}
+
+.stat-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.stat-title { color: #aaa; }
+.val-p1 { color: #d35400; font-weight: bold; } /* Arcilla / Jugador 1 */
+.val-p2 { color: #2980b9; font-weight: bold; } /* Azul / Jugador 2 */
+
+.bar-track {
+    display: flex;
+    height: 10px;
+    background: #2a2a2a;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar-fill-p1 {
+    background: #d35400;
+    transition: width 0.6s ease;
+}
+
+.bar-fill-p2 {
+    background: #2980b9;
+    transition: width 0.6s ease;
+}
+
+/* Badge En Vivo */
+.live-badge {
+    background: #e74c3c;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* =========================================================================
+   ADAPTACIÓN PARA COMPUTADORAS (PC / Desktop)
+   ========================================================================= */
+@media (min-width: 769px) {
+    .sidebar {
+        left: 0; /* Fijo a la izquierda */
+    }
+    .toggle-btn, .sidebar-overlay {
+        display: none !important;
+    }
+    .main-content {
+        margin-left: var(--sidebar-width);
+        padding: 30px;
+    }
+    .content-header h1 {
+        font-size: 28px;
+    }
+    .hero-summary-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+}

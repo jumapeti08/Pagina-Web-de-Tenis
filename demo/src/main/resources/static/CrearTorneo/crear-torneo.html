@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Torneo | Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --clay-orange: #C24E00;
+            --clay-dark: #2A1B15;
+            --clay-bg: #1e1e1e;
+            --clay-card: #2d2d2d;
+            --clay-text: #ffffff;
+            --clay-accent: #d4f01e; /* Color pelota de tenis */
+            --clay-border: #444;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--clay-bg);
+            color: var(--clay-text);
+            margin: 0; padding: 20px;
+            background-image: radial-gradient(circle at 20% 20%, rgba(194, 78, 0, 0.1) 0%, transparent 40%);
+        }
+        .container {
+            max-width: 900px; margin: 30px auto;
+            background-color: var(--clay-card);
+            padding: 40px; border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border-top: 5px solid var(--clay-orange);
+        }
+        h1 {
+            color: var(--clay-orange); text-align: center;
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 40px; font-weight: 700;
+        }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 10px; font-weight: 600; color: #ccc; }
+        input[type="text"], input[type="number"], select {
+            width: 100%; padding: 12px; background: #1a1a1a;
+            border: 1px solid var(--clay-border); color: white;
+            border-radius: 8px; box-sizing: border-box;
+        }
+        input:focus { border-color: var(--clay-orange); outline: none; }
+        .radio-group {
+            display: flex; gap: 20px; background: #1a1a1a;
+            padding: 10px; border-radius: 8px;
+        }
+        .tab-button {
+            background-color: #333; border: 1px solid var(--clay-border);
+            color: #aaa; padding: 12px 20px; cursor: pointer;
+            border-radius: 8px; margin-right: 10px; font-weight: 600; transition: 0.3s;
+        }
+        .tab-button.active {
+            background-color: var(--clay-orange); color: white;
+            border-color: var(--clay-orange); box-shadow: 0 4px 15px rgba(194, 78, 0, 0.3);
+        }
+        .llave-item {
+            display: flex; align-items: center; gap: 15px;
+            margin-bottom: 15px; padding: 20px;
+            background-color: #333; border-radius: 12px;
+            border-left: 4px solid var(--clay-orange);
+        }
+        .vs { font-weight: 900; color: var(--clay-accent); font-style: italic; }
+        .btn-guardar {
+            display: block; width: 100%; padding: 20px;
+            background: linear-gradient(135deg, #C24E00 0%, #8A3700 100%);
+            color: white; border: none; border-radius: 10px;
+            font-size: 1.2rem; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; margin-top: 40px; transition: 0.2s;
+        }
+        .btn-guardar:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(194, 78, 0, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crear Nuevo Torneo</h1>
+
+        <div class="form-group">
+            <label for="nombreTorneo">Nombre del Torneo:</label>
+            <input type="text" id="nombreTorneo" placeholder="Ej: Abierto de Primavera" required>
+        </div>
+        <div class="form-group">
+            <label for="clasificacionTorneo">Clasificación / Serie del Torneo:</label>
+            <select id="clasificacionTorneo" required>
+                <option value="Futuro 50">Futuro 50</option>
+                <option value="Futuro 100">Futuro 100</option>
+                <option value="Futuro 250">Futuro 250</option>
+                <option value="Futuro 500">Futuro 500</option>
+                <option value="Master 1000">Master 1000</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Categoría:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="categoria" value="Sencillos" checked onchange="calcularPartidos()"> Sencillos</label>
+                <label><input type="radio" name="categoria" value="Dobles" onchange="calcularPartidos()"> Dobles</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="numRondas">Número de Rondas (2 a 7):</label>
+            <input type="number" id="numRondas" min="2" max="7" value="3" onchange="calcularPartidos()">
+            <p id="infoPartidos"></p>
+        </div>
+
+        <div class="form-group">
+            <label>¿Hay siembras?</label>
+            <select id="haySiembras" onchange="toggleSiembras()">
+                <option value="no">No</option>
+                <option value="si">Sí</option>
+            </select>
+        </div>
+
+        <div id="seccionSiembras" style="display: none;">
+            <div class="form-group">
+                <label for="cantSiembras">Cantidad de Siembras:</label>
+                <input type="number" id="cantSiembras" min="1" value="1" onchange="generarCamposSiembras()">
+            </div>
+            <div id="contenedorCamposSiembras">
+                <!-- Campos de siembras se generarán aquí -->
+            </div>
+        </div>
+
+        <h2>Estructura del Torneo</h2>
+        <div id="tabsRondas" style="margin-bottom: 20px;">
+            <!-- Botones de rondas se generarán aquí -->
+        </div>
+
+        <div id="contenedorLlaves">
+            <!-- Partidos de la ronda actual se generarán aquí -->
+        </div>
+
+        <button class="btn-guardar" onclick="guardarTorneo()">Guardar Torneo</button>
+    </div>
+
+    <script src="admin-logic.js"></script>
+    <script>
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            calcularPartidos();
+            toggleSiembras();
+        });
+    </script>
+</body>
+</html>
