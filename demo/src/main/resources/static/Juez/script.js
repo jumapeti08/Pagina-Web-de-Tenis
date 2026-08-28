@@ -27,7 +27,7 @@ let stompClient = null;
 function conectarWS() {
     console.log("Intentando establecer conexión WebSocket...");
     // 🔥 CAMBIO AQUÍ: Usa la URL completa de tu backend
-    const socket = new SockJS('http://localhost:8080/ws-tenis'); 
+    const socket = new SockJS('/ws-tenis'); 
     stompClient = Stomp.over(socket);
     
     stompClient.connect({}, (frame) => {

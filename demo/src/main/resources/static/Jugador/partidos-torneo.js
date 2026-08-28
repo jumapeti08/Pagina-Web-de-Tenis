@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function conectarWebSocketVisualizador() {
-    const socket = new SockJS('http://localhost:8080/ws-tenis');
+    const socket = new SockJS('/ws-tenis');
     stompClient = Stomp.over(socket);
     stompClient.debug = null; // Desactiva los logs excesivos en consola
     stompClient.connect({}, () => {
