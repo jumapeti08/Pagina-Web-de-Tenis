@@ -93,14 +93,13 @@ function seleccionarTorneo(id) {
             `;
 
             if (torneoActual.categoria === 'Dobles') {
-                // Si no hay jugador o es nulo, mostramos "BYE"
                 const j1 = partido.jugador1 ? partido.jugador1.usuario : "BYE";
                 const j2 = partido.jugador2 ? partido.jugador2.usuario : "BYE";
                 const j3 = partido.jugador3 ? partido.jugador3.usuario : "BYE";
                 const j4 = partido.jugador4 ? partido.jugador4.usuario : "BYE";
 
                 contenedorLlaves.innerHTML += `
-                    <div class="llave-item" style="display:flex; align-items:center; margin-bottom:10px;">
+                    <div class="llave-item">
                         <span style="color:#aaa; font-weight:bold; min-width:80px;">Mesa ${pNum}</span>
                         <div class="player-pair">
                             <input type="text" id="input_r${rNum}_p${pNum}_j1" value="${j1}" placeholder="Pareja 1 - Jugador A">
@@ -118,7 +117,7 @@ function seleccionarTorneo(id) {
                 const j2 = partido.jugador2 ? partido.jugador2.usuario : "BYE";
 
                 contenedorLlaves.innerHTML += `
-                    <div class="llave-item" style="display:flex; align-items:center; margin-bottom:10px;">
+                    <div class="llave-item">
                         <span style="color:#aaa; font-weight:bold; min-width:80px;">Llave ${pNum}</span>
                         <input type="text" id="input_r${rNum}_p${pNum}_j1" value="${j1}" placeholder="Jugador 1">
                         <span class="vs">VS</span>

@@ -58,23 +58,46 @@ async function cargarPartidosDelTorneo(torneoId) {
             return;
         }
 
-        data.rondas.forEach(ronda => {
+        // 1. ORDENAR LAS RONDAS ASCENDENTEMENTE (Ronda 1, Ronda 2, Ronda 3...)
+        const rondasOrdenadas = data.rondas.sort((a, b) => {
+            const numA = a.numero ?? a.numeroRonda ?? 0;
+            const numB = b.numero ?? b.numeroRonda ?? 0;
+            return numA - numB;
+        });
+
+        // 2. RENDERIZAR RONDAS Y SUS PARTIDOS
+        rondasOrdenadas.forEach(ronda => {
             const rondaDiv = document.createElement("div");
             rondaDiv.className = "ronda-seccion";
 
-            let partidosHTML = `<h3 class="ronda-titulo">${ronda.nombreRonda}</h3><div class="partidos-grid">`;
+            let partidosHTML = `<h3 class="ronda-titulo">${ronda.nombreRonda || 'Ronda ' + (ronda.numero || '')}</h3><div class="partidos-grid">`;
 
-            ronda.partidos.forEach(p => {
+            // Ordenar partidos dentro de la ronda por su ID si vienen desordenados
+            const partidosOrdenados = (ronda.partidos || []).sort((a, b) => a.id - b.id);
+
+            partidosOrdenados.forEach(p => {
                 partidosMap.set(p.id, p);
 
-                // 🛠️ Nombres procesados para evitar [object Object]
-                const j1 = obtenerNombreJugador(p.jugador1);
-                const j2 = obtenerNombreJugador(p.jugador2);
+                // Soporte para Sencillos y Dobles en las tarjetas
+                let textoEnfrentamiento = "";
+                if (p.jugador3 || p.jugador4) {
+                    // Dobles
+                    const j1 = obtenerNombreJugador(p.jugador1);
+                    const j2 = obtenerNombreJugador(p.jugador2);
+                    const j3 = obtenerNombreJugador(p.jugador3);
+                    const j4 = obtenerNombreJugador(p.jugador4);
+                    textoEnfrentamiento = `[${j1} / ${j2}] <span style="color:#d4f01e;">vs</span> [${j3} / ${j4}]`;
+                } else {
+                    // Sencillos
+                    const j1 = obtenerNombreJugador(p.jugador1);
+                    const j2 = obtenerNombreJugador(p.jugador2);
+                    textoEnfrentamiento = `${j1} <span style="color:#d4f01e;">vs</span> ${j2}`;
+                }
 
                 partidosHTML += `
                     <div class="partido-card" onclick="seleccionarPartidoPorId(${p.id})">
                         <div id="estado-card-${p.id}" style="font-size:0.8rem; color:#888; margin-bottom:5px;">${p.estado || 'PROGRAMADO'}</div>
-                        <div style="color:#fff; font-weight:bold;">${j1} vs ${j2}</div>
+                        <div style="color:#fff; font-weight:bold;">${textoEnfrentamiento}</div>
                     </div>
                 `;
             });

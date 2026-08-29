@@ -519,19 +519,26 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
             } else {
                 // DOBLES
                 boolean ganaPareja1 = false;
-                if (partido.getJugador1() != null && ganadorEnviado.contains(partido.getJugador1().getUsuario())) {
-                    ganaPareja1 = true;
-                } else if (partido.getJugador3() != null && ganadorEnviado.contains(partido.getJugador3().getUsuario())) {
+                boolean ganaPareja2 = false;
+
+                // Verificar si ganó algún integrante de Pareja 1 (jugador1 o jugador2)
+                if ((partido.getJugador1() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador1().getUsuario().toLowerCase())) ||
+                    (partido.getJugador2() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador2().getUsuario().toLowerCase()))) {
                     ganaPareja1 = true;
                 }
 
-                // Asignamos como representante al capitán de la pareja vencedora
-                ganadorRep = ganaPareja1 ? partido.getJugador1() : partido.getJugador2();
-            }
+                // Verificar si ganó algún integrante de Pareja 2 (jugador3 o jugador4)
+                if ((partido.getJugador3() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador3().getUsuario().toLowerCase())) ||
+                    (partido.getJugador4() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador4().getUsuario().toLowerCase()))) {
+                    ganaPareja2 = true;
+                }
 
-            if (ganadorRep == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "No se encontró el usuario o pareja ganadora con el nombre: " + ganadorEnviado));
+                // Usar a jugador1 como representante de Pareja 1, o jugador3 para Pareja 2
+                if (ganaPareja1) {
+                    ganadorRep = partido.getJugador1();
+                } else if (ganaPareja2) {
+                    ganadorRep = partido.getJugador3();
+                }
             }
 
             partido.setGanador(ganadorRep);
@@ -628,17 +635,22 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
                                 }
                             } else {
                                 // --- DOBLES ---
-                                // Determinamos los 2 integrantes de la pareja ganadora
-                                boolean ganaPareja1 = (partido.getJugador1() != null && partido.getJugador1().equals(ganadorRep));
-                                Usuario integranteA = ganaPareja1 ? partido.getJugador1() : partido.getJugador2();
-                                Usuario integranteB = ganaPareja1 ? partido.getJugador3() : partido.getJugador4();
+                                // Detección correcta: La Pareja 1 la forman jugador1 y jugador2
+                                boolean ganaPareja1 = (partido.getJugador1() != null && partido.getJugador1().equals(ganadorRep))
+                                                || (partido.getJugador2() != null && partido.getJugador2().equals(ganadorRep));
+
+                                // Si gana Pareja 1: (jugador1, jugador2) | Si gana Pareja 2: (jugador3, jugador4)
+                                Usuario integrante1 = ganaPareja1 ? partido.getJugador1() : partido.getJugador3();
+                                Usuario integrante2 = ganaPareja1 ? partido.getJugador2() : partido.getJugador4();
 
                                 if (esPosicion1) {
-                                    partidoSiguiente.setJugador1(integranteA);
-                                    partidoSiguiente.setJugador3(integranteB);
+                                    // Pasa a ocupar el lado de Pareja 1 en el siguiente partido
+                                    partidoSiguiente.setJugador1(integrante1);
+                                    partidoSiguiente.setJugador2(integrante2);
                                 } else {
-                                    partidoSiguiente.setJugador2(integranteA);
-                                    partidoSiguiente.setJugador4(integranteB);
+                                    // Pasa a ocupar el lado de Pareja 2 en el siguiente partido
+                                    partidoSiguiente.setJugador3(integrante1);
+                                    partidoSiguiente.setJugador4(integrante2);
                                 }
                             }
 
