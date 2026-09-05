@@ -1,48 +1,44 @@
 :root {
     --bg-dark: #121212;
-    --card-bg: #1e1e1e;
+    --card-bg: #1c1c1e;
     --clay-color: #c2522b;
     --accent: #e2eb33;
     --text-light: #ffffff;
-    --text-muted: #a0a0a0;
-    --red: #e74c3c;
-    --blue: #3498db;
-    --orange: #e67e22;
-    --shadow: 0 10px 30px rgba(0,0,0,0.6);
+    --text-muted: #8e8e93;
+    --red: #ff3b30;
+    --orange: #ff9500;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    user-select: none;
 }
 
-body {
+html, body {
+    width: 100%;
+    height: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    overflow: hidden; /* Cero scroll */
 }
 
 /* BLOQUEO DE ORIENTACIÓN VERTICAL */
 .orientacion-aviso {
     display: none;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    inset: 0;
     background: #000;
     z-index: 9999;
     color: var(--accent);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: bold;
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: 20px;
+    padding: 5%;
 }
 
 @media screen and (orientation: portrait) {
@@ -50,107 +46,120 @@ body {
     .app-container { display: none !important; }
 }
 
-/* CONTENEDOR PRINCIPAL */
+/* CONTENEDOR PRINCIPAL BASADO EN PORCENTAJES EN GRID (Suma = 100%) */
 .app-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 6% 62% 32%; /* 6% Header, 62% Marcador/Puntos, 32% Todos los Botones abajo */
     width: 100vw;
     height: 100vh;
-    padding: 4px 8px;
-    gap: 4px;
-    box-sizing: border-box;
+    padding: 1%;
+    gap: 1%;
 }
 
-/* BARRA SUPERIOR */
+/* 1. BARRA SUPERIOR (6%) */
 .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 6vh;
-    min-height: 24px;
-    max-height: 32px;
-    flex-shrink: 0;
+    height: 100%;
 }
 
 .btn-deshacer {
-    background: #2c3e50;
-    color: white;
-    border: 1px solid #34495e;
-    padding: 2px 8px;
+    background: #2c2c2e;
+    color: #34c759;
+    border: 1px solid #3a3a3c;
+    padding: 0 3%;
     border-radius: 4px;
-    font-size: clamp(0.65rem, 2vh, 0.8rem);
-    font-weight: bold;
+    font-size: 2vh;
+    font-weight: 600;
     cursor: pointer;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .badge-estado {
     background: var(--clay-color);
-    padding: 2px 8px;
-    border-radius: 6px;
+    padding: 0 3%;
+    border-radius: 4px;
     font-weight: bold;
-    font-size: clamp(0.65rem, 2vh, 0.8rem);
+    font-size: 1.8vh;
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 
-/* PANTALLA Y PANELES DE JUEGO */
+/* 2. PANEL DE MARCADOR Y PUNTOS (62%) */
 .pantalla {
     display: flex;
-    flex: 1;
     background: var(--card-bg);
-    border-radius: 8px;
-    border: 1px solid #333;
+    border-radius: 6px;
+    border: 1px solid #2c2c2e;
     overflow: hidden;
-    min-height: 0; /* Clave para evitar desbordamiento vertical */
+    height: 100%;
 }
 
 .jugador {
     flex: 1;
-    padding: 4px 6px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
+    padding: 1.5%;
+    gap: 2%;
     min-width: 0;
-    min-height: 0;
+    height: 100%;
 }
 
 h1 {
-    font-size: clamp(0.75rem, 2.8vh, 1rem);
+    font-size: 2.2vh;
     text-transform: uppercase;
     color: var(--clay-color);
-    border-bottom: 2px solid var(--clay-color);
-    width: 100%;
+    border-bottom: 1px solid #2c2c2e;
     text-align: center;
-    padding-bottom: 1px;
-    margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex-shrink: 0;
+    height: 18%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jugador-contenido {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 80%;
+    gap: 2%;
 }
 
 .marcador-principal {
     display: flex;
-    gap: 6px;
-    margin: 2px 0;
+    justify-content: center;
+    gap: 4%;
+    height: 35%;
 }
 
 .item {
-    background: #2a2a2a;
-    padding: 1px 8px;
+    background: #252528;
+    padding: 1% 4%;
     border-radius: 4px;
     text-align: center;
-    border: 1px solid #444;
+    border: 1px solid #3a3a3c;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .item span {
-    font-size: clamp(0.5rem, 1.5vh, 0.65rem);
+    font-size: 1.4vh;
     color: var(--text-muted);
     text-transform: uppercase;
     display: block;
 }
 
 .item p {
-    font-size: clamp(0.85rem, 2.8vh, 1.1rem);
+    font-size: 2.5vh;
     font-weight: bold;
     line-height: 1;
 }
@@ -158,100 +167,118 @@ h1 {
 .puntos-control {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-    margin: 2px 0;
+    justify-content: space-around;
+    background: #121212;
+    border-radius: 6px;
+    padding: 1% 3%;
+    border: 1px solid #2c2c2e;
+    height: 55%;
 }
 
 .puntaje {
-    font-size: clamp(1.4rem, 6.5vh, 2.5rem);
+    font-size: 6vh;
     font-weight: 800;
     color: var(--accent);
-    min-width: 40px;
-    text-align: center;
     line-height: 1;
 }
 
 .btn-sumar {
-    background: #27ae60;
-    color: white;
+    background: #30d158;
+    color: black;
     border: none;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: clamp(0.65rem, 2.2vh, 0.8rem);
-    font-weight: bold;
+    padding: 0 5%;
+    border-radius: 4px;
+    font-size: 2vh;
+    font-weight: 700;
     cursor: pointer;
+    height: 70%;
+    display: flex;
+    align-items: center;
 }
 
-.btn-sumar:active { transform: scale(0.95); }
-
-/* PANEL DE ESTADÍSTICAS (3x2) */
-.panel-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
-    width: 100%;
-}
-
-.btn-s {
-    padding: 3px 2px;
-    border: none;
-    border-radius: 3px;
-    background: #2a2a2a;
-    color: var(--text-light);
-    font-weight: 600;
-    font-size: clamp(0.55rem, 1.8vh, 0.7rem);
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.btn-s:hover { filter: brightness(1.2); }
-
-.ace { border-bottom: 2px solid var(--accent); }
-.doble { border-bottom: 2px solid var(--red); }
-.primer-falta { border-bottom: 2px solid var(--orange); }
-.error-no { border-bottom: 2px solid #7f8c8d; }
-.error-forzado { border-bottom: 2px solid #9b59b6; }
-.winner { border-bottom: 2px solid #f1c40f; }
+.btn-sumar:active { opacity: 0.8; transform: scale(0.96); }
 
 .divisor {
     width: 1px;
-    background: #333;
+    background: #2c2c2e;
 }
 
-/* CONTROLES DE INFERIORES (FOOTER) */
+/* 3. SECCIÓN INFERIOR DE BOTONES (32%) */
+.bottom-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 3%;
+    height: 100%;
+}
+
+/* Grilla de Estadísticas */
+.panel-stats-container {
+    display: flex;
+    gap: 1%;
+    height: 68%;
+}
+
+.panel-stats {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2%;
+    height: 100%;
+}
+
+.btn-s {
+    border: 1px solid #3a3a3c;
+    border-radius: 4px;
+    background: #252528;
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 1.6vh;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+}
+
+.btn-s:active { background: #3a3a3c; }
+
+.ace { border-left: 3px solid var(--accent); }
+.doble { border-left: 3px solid var(--red); }
+.primer-falta { border-left: 3px solid var(--orange); }
+.error-no { border-left: 3px solid #8e8e93; }
+.error-forzado { border-left: 3px solid #bf5af2; }
+.winner { border-left: 3px solid #ffd60a; }
+
+/* Barra de Partido (Terminar / Retiro / Suspender) */
 .footer-controls {
     display: flex;
-    gap: 4px;
-    height: 8vh;
-    min-height: 28px;
-    max-height: 40px;
-    flex-shrink: 0;
+    gap: 1%;
+    height: 29%;
 }
 
 .footer-controls button {
     flex: 1;
-    border-radius: 5px;
+    border-radius: 4px;
     border: none;
-    font-weight: bold;
-    font-size: clamp(0.65rem, 2.2vh, 0.8rem);
+    font-weight: 600;
+    font-size: 1.8vh;
     cursor: pointer;
+    height: 100%;
 }
 
 .btn-finalizar { background: var(--accent); color: black; }
-.btn-w { background: #333; color: white; border: 1px solid #444; }
-.btn-r { background: #c0392b; color: white; }
+.btn-w { background: #252528; color: white; border: 1px solid #3a3a3c; }
+.btn-r { background: #ff453a; color: white; }
 .btn-su { background: var(--clay-color); color: white; }
 
-/* MODALES RESPONSIVOS */
+/* MODAL RESPONSIVO POR PORCENTAJES */
 .modal-overlay {
     display: none;
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
     z-index: 5000;
     justify-content: center;
     align-items: center;
@@ -259,34 +286,9 @@ h1 {
 
 .modal-box {
     background: var(--card-bg);
-    padding: 12px;
-    border-radius: 10px;
-    width: 95%;
-    max-width: 550px;
-    max-height: 92vh;
+    padding: 2%;
+    border-radius: 8px;
+    width: 85%;
+    max-height: 85%;
     overflow-y: auto;
-}
-
-.modal-title {
-    font-size: 0.95rem;
-    margin-bottom: 6px;
-    text-align: center;
-}
-
-.tablas-wrapper { display: flex; gap: 8px; }
-.tabla-col { flex: 1; }
-.jugador-nombre { font-size: 0.8rem; color: var(--clay-color); text-align: center; }
-.stats-table { width: 100%; margin-top: 4px; border-collapse: collapse; }
-.stats-table td { padding: 2px 4px; border-bottom: 1px solid #333; font-size: 0.7rem; }
-
-.modal-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.modal-actions button {
-    flex: 1;
-    padding: 6px;
-    font-size: 0.75rem;
 }

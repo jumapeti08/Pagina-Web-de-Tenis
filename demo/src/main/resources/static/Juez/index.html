@@ -12,43 +12,26 @@
     </div>
 
     <div class="app-container">
-        <!-- BARRA SUPERIOR DE CONTROL -->
+        <!-- 1. BARRA SUPERIOR (6%) -->
         <div class="top-bar">
-            <button class="btn-deshacer" onclick="deshacerUltimaAccion()">↩️ Devolver Última Acción</button>
+            <button class="btn-deshacer" onclick="deshacerUltimaAccion()">↩️ Devolver Acción</button>
             <span id="estado" class="badge-estado">EN_JUEGO</span>
         </div>
 
-        <!-- PANEL PRINCIPAL DE JUEGO -->
+        <!-- 2. MARCADORES Y PUNTAJES (62%) -->
         <div class="pantalla">
             <!-- JUGADOR / EQUIPO 1 -->
             <div class="jugador">
                 <h1 id="nombreJ1">Cargando...</h1>
-                
-                <!-- SELECTOR DE JUGADOR EN DOBLES (E1) -->
-                <div id="selector-dobles-e1" style="display: none; margin-bottom: 5px;">
-                    <label style="font-size: 0.7rem; color: #a0a0a0;">Acción realizada por:</label>
-                    <select id="select-jugador-e1" style="width: 100%; padding: 3px; font-size: 0.8rem; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-                        <!-- Se llena dinámicamente -->
-                    </select>
-                </div>
-
-                <div class="marcador-principal">
-                    <div class="item"><span>Games</span><p id="sumarGameJug1">0</p></div>
-                    <div class="item"><span>Sets</span><p id="setJug1">0</p></div>
-                </div>
-                
-                <div class="puntos-control">
-                    <button class="btn-sumar" onclick="sumarJugador1()">+ Puntos E1</button>
-                    <p class="puntaje" id="puntaje1">0</p>
-                </div>
-
-                <div class="panel-stats">
-                    <button class="btn-s ace" onclick="registrarStat(1, 'ace')">Ace</button>
-                    <button class="btn-s doble" onclick="registrarStat(1, 'dobleFalta')">D. Falta</button>
-                    <button class="btn-s primer-falta" onclick="registrarStat(1, '1raFalta')">1ra Falta</button>
-                    <button class="btn-s error-no" onclick="registrarStat(1, 'errorNo')">Error No F.</button>
-                    <button class="btn-s error-forzado" onclick="registrarStat(1, 'errorForzado')">Err. Forzado</button>
-                    <button class="btn-s winner" onclick="registrarStat(1, 'winner')">Winner</button>
+                <div class="jugador-contenido">
+                    <div class="marcador-principal">
+                        <div class="item"><span>Games</span><p id="sumarGameJug1">0</p></div>
+                        <div class="item"><span>Sets</span><p id="setJug1">0</p></div>
+                    </div>
+                    <div class="puntos-control">
+                        <p class="puntaje" id="puntaje1">0</p>
+                        <button class="btn-sumar" onclick="sumarJugador1()">+ Pts E1</button>
+                    </div>
                 </div>
             </div>
 
@@ -57,62 +40,76 @@
             <!-- JUGADOR / EQUIPO 2 -->
             <div class="jugador">
                 <h1 id="nombreJ2">Cargando...</h1>
-
-                <!-- SELECTOR DE JUGADOR EN DOBLES (E2) -->
-                
-
-                <div class="marcador-principal">
-                    <div class="item"><span>Games</span><p id="sumarGameJug2">0</p></div>
-                    <div class="item"><span>Sets</span><p id="setJug2">0</p></div>
-                </div>
-
-                <div class="puntos-control">
-                    <p class="puntaje" id="puntaje2">0</p>
-                    <button class="btn-sumar" onclick="sumarJugador2()">+ Puntos E2</button>
-                </div>
-
-                <div class="panel-stats">
-                    <button class="btn-s ace" onclick="registrarStat(2, 'ace')">Ace</button>
-                    <button class="btn-s doble" onclick="registrarStat(2, 'dobleFalta')">D. Falta</button>
-                    <button class="btn-s primer-falta" onclick="registrarStat(2, '1raFalta')">1ra Falta</button>
-                    <button class="btn-s error-no" onclick="registrarStat(2, 'errorNo')">Error No F.</button>
-                    <button class="btn-s error-forzado" onclick="registrarStat(2, 'errorForzado')">Err. Forzado</button>
-                    <button class="btn-s winner" onclick="registrarStat(2, 'winner')">Winner</button>
+                <div class="jugador-contenido">
+                    <div class="marcador-principal">
+                        <div class="item"><span>Games</span><p id="sumarGameJug2">0</p></div>
+                        <div class="item"><span>Sets</span><p id="setJug2">0</p></div>
+                    </div>
+                    <div class="puntos-control">
+                        <p class="puntaje" id="puntaje2">0</p>
+                        <button class="btn-sumar" onclick="sumarJugador2()">+ Pts E2</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- FOOTER DE ACCIONES -->
-        <div class="footer-controls">
-            <button class="btn-finalizar" onclick="terminarManual('Normal')">🏁 Terminar Partido</button>
-            <button class="btn-w" onclick="terminarManual('W')">🏆 Ganar por W</button>
-            <button class="btn-r" onclick="terminarManual('R')">🚫 Retiro</button>
-            <button class="btn-su" onclick="terminarManual('Su')">⏸️ Suspender</button>
+        <!-- 3. TODOS LOS BOTONES ABAJO (32%) -->
+        <div class="bottom-controls">
+            <!-- Botones de Estadísticas divididos por jugador -->
+            <div class="panel-stats-container">
+                <!-- Stats Equipo 1 -->
+                <div class="panel-stats">
+                    <button class="btn-s ace" onclick="registrarStat(1, 'ace')">Ace</button>
+                    <button class="btn-s doble" onclick="registrarStat(1, 'dobleFalta')">D.Falta</button>
+                    <button class="btn-s primer-falta" onclick="registrarStat(1, '1raFalta')">1ra Falta</button>
+                    <button class="btn-s error-no" onclick="registrarStat(1, 'errorNo')">Err. NF</button>
+                    <button class="btn-s error-forzado" onclick="registrarStat(1, 'errorForzado')">Err. Forz</button>
+                    <button class="btn-s winner" onclick="registrarStat(1, 'winner')">Winner</button>
+                </div>
+
+                <div class="divisor"></div>
+
+                <!-- Stats Equipo 2 -->
+                <div class="panel-stats">
+                    <button class="btn-s ace" onclick="registrarStat(2, 'ace')">Ace</button>
+                    <button class="btn-s doble" onclick="registrarStat(2, 'dobleFalta')">D.Falta</button>
+                    <button class="btn-s primer-falta" onclick="registrarStat(2, '1raFalta')">1ra Falta</button>
+                    <button class="btn-s error-no" onclick="registrarStat(2, 'errorNo')">Err. NF</button>
+                    <button class="btn-s error-forzado" onclick="registrarStat(2, 'errorForzado')">Err. Forz</button>
+                    <button class="btn-s winner" onclick="registrarStat(2, 'winner')">Winner</button>
+                </div>
+            </div>
+
+            <!-- Botones Generales de Control -->
+            <div class="footer-controls">
+                <button class="btn-finalizar" onclick="terminarManual('Normal')">🏁 Terminar</button>
+                <button class="btn-w" onclick="terminarManual('W')">🏆 Ganar W</button>
+                <button class="btn-r" onclick="terminarManual('R')">🚫 Retiro</button>
+                <button class="btn-su" onclick="terminarManual('Su')">⏸️ Suspender</button>
+            </div>
         </div>
     </div>
 
     <!-- MODAL DE ESTADÍSTICAS -->
-    <div id="modal-stats" class="modal-overlay" style="display:none;">
+    <div id="modal-stats" class="modal-overlay">
         <div class="modal-box">
-            <h2 class="modal-title">📊 Resumen del Partido</h2>
-            <div id="container-tablas" class="tablas-wrapper" style="display: flex; gap: 10px; overflow-x: auto;">
-                <!-- Tablas generadas dinámicamente -->
-            </div>
-            
-            <div class="modal-actions" style="margin-top: 15px;">
-                <button id="btn-guardar-bd" class="btn-finalizar" onclick="guardarYPasarSiguienteRonda()">💾 Guardar Resultado</button>
-                <button class="btn-nuevo-partido" onclick="cerrarStats()">Salir al Panel</button>
+            <h2 style="font-size:2vh; text-align:center; margin-bottom:2%;">📊 Resumen del Partido</h2>
+            <div id="container-tablas" style="display: flex; gap: 2%;"></div>
+            <div style="display:flex; gap:2%; margin-top:3%;">
+                <button id="btn-guardar-bd" class="btn-finalizar" style="flex:1; padding:2%; font-size:1.8vh;" onclick="guardarYPasarSiguienteRonda()">💾 Guardar</button>
+                <button style="flex:1; padding:2%; font-size:1.8vh; background:#3a3a3c; color:white; border:none; border-radius:4px;" onclick="cerrarStats()">Salir</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-seleccion-jugador" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: #1e1e1e; color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 320px; text-align: center; border: 1px solid #444;">
-            <h3 style="margin-top: 0; font-size: 1.1rem;">¿Quién realizó la acción?</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                <button id="btn-jugador-1" style="padding: 12px; font-size: 1rem; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;"></button>
-                <button id="btn-jugador-2" style="padding: 12px; font-size: 1rem; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;"></button>
-                <button onclick="cerrarModalSeleccion()" style="padding: 8px; font-size: 0.9rem; border: none; border-radius: 5px; background-color: #6c757d; color: white; cursor: pointer; margin-top: 5px;">Cancelar</button>
+    <!-- MODAL SELECCIÓN DOBLES -->
+    <div id="modal-seleccion-jugador" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 6000; justify-content: center; align-items: center;">
+        <div style="background: #1c1c1e; color: #fff; padding: 3%; border-radius: 8px; width: 80%; max-width: 260px; text-align: center; border: 1px solid #3a3a3c;">
+            <h3 style="margin: 0 0 4% 0; font-size: 2vh;">¿Quién realizó la acción?</h3>
+            <div style="display: flex; flex-direction: column; gap: 2%;">
+                <button id="btn-jugador-1" style="padding: 3%; font-size: 1.8vh; border: none; border-radius: 4px; background-color: #30d158; color: black; font-weight:bold;"></button>
+                <button id="btn-jugador-2" style="padding: 3%; font-size: 1.8vh; border: none; border-radius: 4px; background-color: #0a84ff; color: white; font-weight:bold;"></button>
+                <button onclick="cerrarModalSeleccion()" style="padding: 2%; font-size: 1.6vh; border: none; border-radius: 4px; background-color: #3a3a3c; color: white;">Cancelar</button>
             </div>
         </div>
     </div>
