@@ -18,11 +18,11 @@
 }
 
 html, body {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100dvh; /* <--- Ajuste para navegadores móviles */
     background-color: var(--bg-dark);
     color: var(--text-light);
-    overflow: hidden; /* Cero scroll */
+    overflow: hidden;
 }
 
 /* BLOQUEO DE ORIENTACIÓN VERTICAL */
@@ -49,9 +49,10 @@ html, body {
 /* CONTENEDOR PRINCIPAL BASADO EN PORCENTAJES EN GRID (Suma = 100%) */
 .app-container {
     display: grid;
-    grid-template-rows: 6% 62% 32%; /* 6% Header, 62% Marcador/Puntos, 32% Todos los Botones abajo */
+    /* Reducimos ligeramente la proporción del marcador para dar aire a los botones */
+    grid-template-rows: 8% 54% 38%; 
     width: 100vw;
-    height: 100vh;
+    height: 100dvh; /* <--- Ajuste clave */
     padding: 1%;
     gap: 1%;
 }
@@ -207,15 +208,14 @@ h1 {
 .bottom-controls {
     display: flex;
     flex-direction: column;
-    gap: 3%;
+    gap: 2%;
     height: 100%;
 }
 
-/* Grilla de Estadísticas */
 .panel-stats-container {
     display: flex;
     gap: 1%;
-    height: 68%;
+    height: 72%; /* Reduce el alto de las estadísticas */
 }
 
 .panel-stats {
@@ -255,15 +255,15 @@ h1 {
 .footer-controls {
     display: flex;
     gap: 1%;
-    height: 29%;
+    height: 26%; /* Asegura espacio visible para la barra final */
 }
 
 .footer-controls button {
     flex: 1;
     border-radius: 4px;
     border: none;
-    font-weight: 600;
-    font-size: 1.8vh;
+    font-weight: bold;
+    font-size: 1.5vh;
     cursor: pointer;
     height: 100%;
 }
