@@ -37,7 +37,7 @@ body {
     background: #000;
     z-index: 9999;
     color: var(--accent);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: bold;
     justify-content: center;
     align-items: center;
@@ -56,15 +56,19 @@ body {
     flex-direction: column;
     width: 100vw;
     height: 100vh;
-    padding: 5px 10px;
-    gap: 5px;
+    padding: 4px 8px;
+    gap: 4px;
+    box-sizing: border-box;
 }
 
+/* BARRA SUPERIOR */
 .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 32px;
+    height: 6vh;
+    min-height: 24px;
+    max-height: 32px;
     flex-shrink: 0;
 }
 
@@ -72,53 +76,51 @@ body {
     background: #2c3e50;
     color: white;
     border: 1px solid #34495e;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: clamp(0.65rem, 2vh, 0.8rem);
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
 }
-
-.btn-deshacer:hover { background: #34495e; }
 
 .badge-estado {
     background: var(--clay-color);
     padding: 2px 8px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-weight: bold;
-    font-size: 0.75rem;
+    font-size: clamp(0.65rem, 2vh, 0.8rem);
 }
 
+/* PANTALLA Y PANELES DE JUEGO */
 .pantalla {
     display: flex;
     flex: 1;
     background: var(--card-bg);
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid #333;
     overflow: hidden;
-    min-height: 0; /* Permite escalado flexible */
+    min-height: 0; /* Clave para evitar desbordamiento vertical */
 }
 
 .jugador {
     flex: 1;
-    padding: 6px 10px;
+    padding: 4px 6px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    min-width: 0; /* Previene desbordamiento flex */
+    min-width: 0;
+    min-height: 0;
 }
 
-/* NOMBRE DE JUGADORES OPTIMIZADO */
 h1 {
-    font-size: clamp(0.85rem, 2.5vh, 1.1rem);
+    font-size: clamp(0.75rem, 2.8vh, 1rem);
     text-transform: uppercase;
     color: var(--clay-color);
     border-bottom: 2px solid var(--clay-color);
     width: 100%;
     text-align: center;
-    padding-bottom: 2px;
+    padding-bottom: 1px;
     margin-bottom: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -128,43 +130,45 @@ h1 {
 
 .marcador-principal {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    margin: 2px 0;
 }
 
 .item {
     background: #2a2a2a;
-    padding: 2px 10px;
-    border-radius: 6px;
+    padding: 1px 8px;
+    border-radius: 4px;
     text-align: center;
     border: 1px solid #444;
 }
 
 .item span {
-    font-size: 0.55rem;
+    font-size: clamp(0.5rem, 1.5vh, 0.65rem);
     color: var(--text-muted);
     text-transform: uppercase;
     display: block;
 }
 
 .item p {
-    font-size: 1.1rem;
+    font-size: clamp(0.85rem, 2.8vh, 1.1rem);
     font-weight: bold;
-    line-height: 1.1;
+    line-height: 1;
 }
 
 .puntos-control {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 6px;
     width: 100%;
+    margin: 2px 0;
 }
 
 .puntaje {
-    font-size: clamp(2rem, 8vh, 3rem);
+    font-size: clamp(1.4rem, 6.5vh, 2.5rem);
     font-weight: 800;
     color: var(--accent);
-    min-width: 50px;
+    min-width: 40px;
     text-align: center;
     line-height: 1;
 }
@@ -173,12 +177,11 @@ h1 {
     background: #27ae60;
     color: white;
     border: none;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: clamp(0.65rem, 2.2vh, 0.8rem);
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.1s;
 }
 
 .btn-sumar:active { transform: scale(0.95); }
@@ -187,18 +190,18 @@ h1 {
 .panel-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
+    gap: 3px;
     width: 100%;
 }
 
 .btn-s {
-    padding: 4px 2px;
+    padding: 3px 2px;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     background: #2a2a2a;
     color: var(--text-light);
     font-weight: 600;
-    font-size: 0.65rem;
+    font-size: clamp(0.55rem, 1.8vh, 0.7rem);
     cursor: pointer;
     white-space: nowrap;
     overflow: hidden;
@@ -219,20 +222,22 @@ h1 {
     background: #333;
 }
 
-/* FOOTER CONTROLES */
+/* CONTROLES DE INFERIORES (FOOTER) */
 .footer-controls {
     display: flex;
-    gap: 6px;
-    height: 36px;
+    gap: 4px;
+    height: 8vh;
+    min-height: 28px;
+    max-height: 40px;
     flex-shrink: 0;
 }
 
 .footer-controls button {
     flex: 1;
-    border-radius: 6px;
+    border-radius: 5px;
     border: none;
     font-weight: bold;
-    font-size: 0.75rem;
+    font-size: clamp(0.65rem, 2.2vh, 0.8rem);
     cursor: pointer;
 }
 
@@ -241,7 +246,7 @@ h1 {
 .btn-r { background: #c0392b; color: white; }
 .btn-su { background: var(--clay-color); color: white; }
 
-/* MODAL */
+/* MODALES RESPONSIVOS */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -254,34 +259,34 @@ h1 {
 
 .modal-box {
     background: var(--card-bg);
-    padding: 15px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
+    padding: 12px;
+    border-radius: 10px;
+    width: 95%;
+    max-width: 550px;
+    max-height: 92vh;
     overflow-y: auto;
 }
 
 .modal-title {
-    font-size: 1rem;
-    margin-bottom: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
     text-align: center;
 }
 
-.tablas-wrapper { display: flex; gap: 10px; }
+.tablas-wrapper { display: flex; gap: 8px; }
 .tabla-col { flex: 1; }
-.jugador-nombre { font-size: 0.85rem; color: var(--clay-color); text-align: center; }
-.stats-table { width: 100%; margin-top: 5px; border-collapse: collapse; }
-.stats-table td { padding: 4px; border-bottom: 1px solid #333; font-size: 0.75rem; }
+.jugador-nombre { font-size: 0.8rem; color: var(--clay-color); text-align: center; }
+.stats-table { width: 100%; margin-top: 4px; border-collapse: collapse; }
+.stats-table td { padding: 2px 4px; border-bottom: 1px solid #333; font-size: 0.7rem; }
 
 .modal-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .modal-actions button {
     flex: 1;
-    padding: 8px;
-    font-size: 0.8rem;
+    padding: 6px;
+    font-size: 0.75rem;
 }
