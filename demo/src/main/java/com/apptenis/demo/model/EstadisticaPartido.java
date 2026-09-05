@@ -18,6 +18,8 @@ public class EstadisticaPartido {
     private int erroresNoForzadosJ1 = 0;
     private int puntosEnRedJ1 = 0;
     private int winnersJ1 = 0;
+    private int primerFaltaJ1 = 0;
+    private int errorForzadoJ1 = 0;
 
     // --- Estadísticas Jugador/Pareja 2 ---
     private int acesJ2 = 0;
@@ -25,4 +27,6 @@ public class EstadisticaPartido {
     private int erroresNoForzadosJ2 = 0;
     private int puntosEnRedJ2 = 0;
     private int winnersJ2 = 0;
+    private int primerFaltaJ2 = 0;
+    private int errorForzadoJ2 = 0;
 }

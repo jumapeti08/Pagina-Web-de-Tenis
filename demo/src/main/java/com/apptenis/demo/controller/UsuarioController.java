@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import com.apptenis.demo.service.UsuarioService;
 import java.util.List;
 import com.apptenis.demo.DTOs.ActualizarPerfilDTO;
+import com.apptenis.demo.repository.EstadisticaGeneralDoblesRepository;
+import com.apptenis.demo.model.EstadisticaGeneralDobles;
+import com.apptenis.demo.model.EstadisticaPartidoDobles;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -72,10 +75,16 @@ public class UsuarioController {
     }
 
     @Autowired
-private EstadisticaGeneralRepository estadisticaGeneralRepository;
+    private EstadisticaGeneralRepository estadisticaGeneralRepository;
+
+    @Autowired
+    private EstadisticaGeneralDoblesRepository estadisticaGeneralDoblesRepository;
 
     @GetMapping("/{username}/estadisticas-globales")
-    public ResponseEntity<?> obtenerEstadisticasGlobales(@PathVariable String username) {
+    public ResponseEntity<?> obtenerEstadisticasGlobales(
+            @PathVariable String username,
+            @RequestParam(value = "modalidad", defaultValue = "SENCILLOS") String modalidad) {
+
         Optional<Usuario> usuarioOpt = usuarioRepository.findByUsuario(username);
 
         if (usuarioOpt.isEmpty()) {
@@ -83,55 +92,102 @@ private EstadisticaGeneralRepository estadisticaGeneralRepository;
         }
 
         Usuario usuario = usuarioOpt.get();
-
-        // Buscar las estadísticas asociadas al usuario en la tabla 'estadisticas_generales'
-        EstadisticaGeneral stats = estadisticaGeneralRepository.findByUsuario(usuario)
-                .orElseGet(() -> {
-                    // Si aún no tiene registro, devolvemos uno vacío
-                    EstadisticaGeneral nuevaStat = new EstadisticaGeneral();
-                    nuevaStat.setUsuario(usuario);
-                    return nuevaStat;
-                });
-
-        // Mapear métricas desde la entidad EstadisticaGeneral
-        int partidosJugados = stats.getPartidosJugados();
-        int partidosGanados = stats.getPartidosGanados();
-        int partidosPerdidos = Math.max(0, partidosJugados - partidosGanados);
-
-        int totalAces = stats.getAces();
-        int totalDoblesFaltas = stats.getDoblesFaltas();
-        int totalErrores = stats.getErroresNoForzados();
-        int totalWinners = stats.getWinners();
-        int totalPuntosRed = stats.getRed();
-
-        // Calcular promedios por partido
-        double promAces = partidosJugados > 0 ? (double) totalAces / partidosJugados : 0.0;
-        double promDoblesFaltas = partidosJugados > 0 ? (double) totalDoblesFaltas / partidosJugados : 0.0;
-        double promErrores = partidosJugados > 0 ? (double) totalErrores / partidosJugados : 0.0;
-        double promWinners = partidosJugados > 0 ? (double) totalWinners / partidosJugados : 0.0;
-        double promPuntosRed = partidosJugados > 0 ? (double) totalPuntosRed / partidosJugados : 0.0;
-        
-        double porcentajeVictorias = partidosJugados > 0 ? ((double) partidosGanados / partidosJugados) * 100 : 0.0;
-
         Map<String, Object> response = new HashMap<>();
-        response.put("partidosJugados", partidosJugados);
-        response.put("partidosGanados", partidosGanados);
-        response.put("partidosPerdidos", partidosPerdidos);
-        response.put("porcentajeVictorias", String.format("%.1f", porcentajeVictorias));
 
-        // Totales
-        response.put("totalAces", totalAces);
-        response.put("totalDoblesFaltas", totalDoblesFaltas);
-        response.put("totalErrores", totalErrores);
-        response.put("totalWinners", totalWinners);
-        response.put("totalPuntosRed", totalPuntosRed);
+        if ("DOBLES".equalsIgnoreCase(modalidad)) {
+            EstadisticaGeneralDobles stats = estadisticaGeneralDoblesRepository.findByUsuario(usuario)
+                    .orElseGet(() -> {
+                        EstadisticaGeneralDobles nuevaStat = new EstadisticaGeneralDobles();
+                        nuevaStat.setUsuario(usuario);
+                        return nuevaStat;
+                    });
 
-        // Promedios por partido
-        response.put("promAces", String.format("%.1f", promAces));
-        response.put("promDoblesFaltas", String.format("%.1f", promDoblesFaltas));
-        response.put("promErrores", String.format("%.1f", promErrores));
-        response.put("promWinners", String.format("%.1f", promWinners));
-        response.put("promPuntosRed", String.format("%.1f", promPuntosRed));
+            int partidosJugados = stats.getPartidosJugados();
+            int partidosGanados = stats.getPartidosGanados();
+            int partidosPerdidos = Math.max(0, partidosJugados - partidosGanados);
+
+            int totalAces = stats.getAces();
+            int totalDoblesFaltas = stats.getDoblesFaltas();
+            int totalErrores = stats.getErroresNoForzados();
+            int totalWinners = stats.getWinners();
+            int totalPrimerFalta = stats.getPrimerFalta();
+            int totalErrorForzado = stats.getErrorForzado();
+
+            double promAces = partidosJugados > 0 ? (double) totalAces / partidosJugados : 0.0;
+            double promDoblesFaltas = partidosJugados > 0 ? (double) totalDoblesFaltas / partidosJugados : 0.0;
+            double promErrores = partidosJugados > 0 ? (double) totalErrores / partidosJugados : 0.0;
+            double promWinners = partidosJugados > 0 ? (double) totalWinners / partidosJugados : 0.0;
+            double promPrimerFalta = partidosJugados > 0 ? (double) totalPrimerFalta / partidosJugados : 0.0;
+            double promErrorForzado = partidosJugados > 0 ? (double) totalErrorForzado / partidosJugados : 0.0;
+            double porcentajeVictorias = partidosJugados > 0 ? ((double) partidosGanados / partidosJugados) * 100 : 0.0;
+
+            response.put("modalidad", "DOBLES");
+            response.put("partidosJugados", partidosJugados);
+            response.put("partidosGanados", partidosGanados);
+            response.put("partidosPerdidos", partidosPerdidos);
+            response.put("porcentajeVictorias", String.format("%.1f", porcentajeVictorias));
+
+            response.put("totalAces", totalAces);
+            response.put("totalDoblesFaltas", totalDoblesFaltas);
+            response.put("totalErrores", totalErrores);
+            response.put("totalWinners", totalWinners);
+            response.put("totalPrimerFalta", totalPrimerFalta);
+            response.put("totalErrorForzado", totalErrorForzado);
+
+            response.put("promAces", String.format("%.1f", promAces));
+            response.put("promDoblesFaltas", String.format("%.1f", promDoblesFaltas));
+            response.put("promErrores", String.format("%.1f", promErrores));
+            response.put("promWinners", String.format("%.1f", promWinners));
+            response.put("promPrimerFalta", String.format("%.1f", promPrimerFalta));
+            response.put("promErrorForzado", String.format("%.1f", promErrorForzado));
+
+        } else {
+            EstadisticaGeneral stats = estadisticaGeneralRepository.findByUsuario(usuario)
+                    .orElseGet(() -> {
+                        EstadisticaGeneral nuevaStat = new EstadisticaGeneral();
+                        nuevaStat.setUsuario(usuario);
+                        return nuevaStat;
+                    });
+
+            int partidosJugados = stats.getPartidosJugados();
+            int partidosGanados = stats.getPartidosGanados();
+            int partidosPerdidos = Math.max(0, partidosJugados - partidosGanados);
+
+            int totalAces = stats.getAces();
+            int totalDoblesFaltas = stats.getDoblesFaltas();
+            int totalErrores = stats.getErroresNoForzados();
+            int totalWinners = stats.getWinners();
+            int totalPrimerFalta = stats.getPrimerFalta();
+            int totalErrorForzado = stats.getErrorForzado();
+
+            double promAces = partidosJugados > 0 ? (double) totalAces / partidosJugados : 0.0;
+            double promDoblesFaltas = partidosJugados > 0 ? (double) totalDoblesFaltas / partidosJugados : 0.0;
+            double promErrores = partidosJugados > 0 ? (double) totalErrores / partidosJugados : 0.0;
+            double promWinners = partidosJugados > 0 ? (double) totalWinners / partidosJugados : 0.0;
+            double promPrimerFalta = partidosJugados > 0 ? (double) totalPrimerFalta / partidosJugados : 0.0;
+            double promErrorForzado = partidosJugados > 0 ? (double) totalErrorForzado / partidosJugados : 0.0;
+            double porcentajeVictorias = partidosJugados > 0 ? ((double) partidosGanados / partidosJugados) * 100 : 0.0;
+
+            response.put("modalidad", "SENCILLOS");
+            response.put("partidosJugados", partidosJugados);
+            response.put("partidosGanados", partidosGanados);
+            response.put("partidosPerdidos", partidosPerdidos);
+            response.put("porcentajeVictorias", String.format("%.1f", porcentajeVictorias));
+
+            response.put("totalAces", totalAces);
+            response.put("totalDoblesFaltas", totalDoblesFaltas);
+            response.put("totalErrores", totalErrores);
+            response.put("totalWinners", totalWinners);
+            response.put("totalPrimerFalta", totalPrimerFalta);
+            response.put("totalErrorForzado", totalErrorForzado);
+
+            response.put("promAces", String.format("%.1f", promAces));
+            response.put("promDoblesFaltas", String.format("%.1f", promDoblesFaltas));
+            response.put("promErrores", String.format("%.1f", promErrores));
+            response.put("promWinners", String.format("%.1f", promWinners));
+            response.put("promPrimerFalta", String.format("%.1f", promPrimerFalta));
+            response.put("promErrorForzado", String.format("%.1f", promErrorForzado));
+        }
 
         return ResponseEntity.ok(response);
     }
@@ -211,45 +267,29 @@ private EstadisticaGeneralRepository estadisticaGeneralRepository;
             }
 
             Torneo torneo = torneoOpt.get();
-
-            // 1. Obtener los partidos del torneo a través de la ronda
             List<Partido> partidos = partidoRepository.findByRondaTorneoId(torneoId);
-
-            // 2. Agrupar partidos por el nombre de la Ronda
             Map<String, List<Map<String, Object>>> partidosPorRonda = new HashMap<>();
 
             for (Partido p : partidos) {
-                // Formateo del nombre de la ronda usando getNumero()
                 String nombreRonda = (p.getRonda() != null) 
                         ? "Ronda " + p.getRonda().getNumero() 
                         : "Fase General";
 
                 Map<String, Object> partidoDTO = new HashMap<>();
                 partidoDTO.put("id", p.getId());
-                
-                // Nombres para sencillos / dobles
-                // ✅ CÓDIGO CORREGIDO
                 partidoDTO.put("jugador1", p.getJugador1());
                 partidoDTO.put("jugador2", p.getJugador2());
                 partidoDTO.put("jugador3", p.getJugador3());
                 partidoDTO.put("jugador4", p.getJugador4());
                 partidoDTO.put("estado", p.getEstado());
 
-
-
-                // Dentro del bucle for (Partido p : partidos) en UsuarioController.java
-
-// Games por Set individual
                 partidoDTO.put("gamesSet1J1", p.getGamesSet1J1());
                 partidoDTO.put("gamesSet1J2", p.getGamesSet1J2());
-
                 partidoDTO.put("gamesSet2J1", p.getGamesSet2J1());
                 partidoDTO.put("gamesSet2J2", p.getGamesSet2J2());
-
                 partidoDTO.put("gamesSet3J1", p.getGamesSet3J1());
                 partidoDTO.put("gamesSet3J2", p.getGamesSet3J2());
 
-                // Marcador en vivo (Puntos, Games y Sets)
                 partidoDTO.put("puntosJ1", p.getPuntosActualesJ1());
                 partidoDTO.put("puntosJ2", p.getPuntosActualesJ2());
                 
@@ -261,30 +301,85 @@ private EstadisticaGeneralRepository estadisticaGeneralRepository;
                 partidoDTO.put("setsJ1", p.getSetsGanadosJ1());
                 partidoDTO.put("setsJ2", p.getSetsGanadosJ2());
 
-                // Estadísticas
-                Map<String, Integer> statsMap = new HashMap<>();
-                if (p.getEstadisticas() != null) {
-                    statsMap.put("acesJ1", p.getEstadisticas().getAcesJ1());
-                    statsMap.put("acesJ2", p.getEstadisticas().getAcesJ2());
-                    statsMap.put("winnersJ1", p.getEstadisticas().getWinnersJ1());
-                    statsMap.put("winnersJ2", p.getEstadisticas().getWinnersJ2());
-                    statsMap.put("erroresJ1", p.getEstadisticas().getErroresNoForzadosJ1());
-                    statsMap.put("erroresJ2", p.getEstadisticas().getErroresNoForzadosJ2());
-                    statsMap.put("doblesFaltasJ1", p.getEstadisticas().getDoblesFaltasJ1());
-                    statsMap.put("doblesFaltasJ2", p.getEstadisticas().getDoblesFaltasJ2());
+                // Determinar si el torneo o partido es de modalidad Dobles
+                boolean esDobles = "Dobles".equalsIgnoreCase(torneo.getCategoria()) || 
+                                (p.getJugador3() != null || p.getJugador4() != null);
+                partidoDTO.put("esDobles", esDobles);
+
+                Map<String, Object> statsMap = new HashMap<>();
+
+                if (!esDobles) {
+                    // Mapeo Sencillos
+                    if (p.getEstadisticas() != null) {
+                        statsMap.put("acesJ1", p.getEstadisticas().getAcesJ1());
+                        statsMap.put("acesJ2", p.getEstadisticas().getAcesJ2());
+                        statsMap.put("winnersJ1", p.getEstadisticas().getWinnersJ1());
+                        statsMap.put("winnersJ2", p.getEstadisticas().getWinnersJ2());
+                        statsMap.put("erroresJ1", p.getEstadisticas().getErroresNoForzadosJ1());
+                        statsMap.put("erroresJ2", p.getEstadisticas().getErroresNoForzadosJ2());
+                        statsMap.put("doblesFaltasJ1", p.getEstadisticas().getDoblesFaltasJ1());
+                        statsMap.put("doblesFaltasJ2", p.getEstadisticas().getDoblesFaltasJ2());
+                        statsMap.put("primerFaltaJ1", p.getEstadisticas().getPrimerFaltaJ1());
+                        statsMap.put("primerFaltaJ2", p.getEstadisticas().getPrimerFaltaJ2());
+                        statsMap.put("errorForzadoJ1", p.getEstadisticas().getErrorForzadoJ1());
+                        statsMap.put("errorForzadoJ2", p.getEstadisticas().getErrorForzadoJ2());
+                    } else {
+                        statsMap.put("acesJ1", 0); statsMap.put("acesJ2", 0);
+                        statsMap.put("winnersJ1", 0); statsMap.put("winnersJ2", 0);
+                        statsMap.put("erroresJ1", 0); statsMap.put("erroresJ2", 0);
+                        statsMap.put("doblesFaltasJ1", 0); statsMap.put("doblesFaltasJ2", 0);
+                        statsMap.put("primerFaltaJ1", 0); statsMap.put("primerFaltaJ2", 0);
+                        statsMap.put("errorForzadoJ1", 0); statsMap.put("errorForzadoJ2", 0);
+                    }
+                }  else {
+    // Mapeo Dobles desde EstadisticaPartidoDobles
+                if (p.getEstadisticasDobles() != null) {
+                    EstadisticaPartidoDobles statsDobles = p.getEstadisticasDobles();
+
+                    statsMap.put("acesJ1", statsDobles.getAcesJ1());
+                    statsMap.put("acesJ2", statsDobles.getAcesJ2());
+                    statsMap.put("acesJ3", statsDobles.getAcesJ3());
+                    statsMap.put("acesJ4", statsDobles.getAcesJ4());
+
+                    statsMap.put("winnersJ1", statsDobles.getWinnersJ1());
+                    statsMap.put("winnersJ2", statsDobles.getWinnersJ2());
+                    statsMap.put("winnersJ3", statsDobles.getWinnersJ3());
+                    statsMap.put("winnersJ4", statsDobles.getWinnersJ4());
+
+                    statsMap.put("erroresJ1", statsDobles.getErroresNoForzadosJ1());
+                    statsMap.put("erroresJ2", statsDobles.getErroresNoForzadosJ2());
+                    statsMap.put("erroresJ3", statsDobles.getErroresNoForzadosJ3());
+                    statsMap.put("erroresJ4", statsDobles.getErroresNoForzadosJ4());
+
+                    statsMap.put("doblesFaltasJ1", statsDobles.getDoblesFaltasJ1());
+                    statsMap.put("doblesFaltasJ2", statsDobles.getDoblesFaltasJ2());
+                    statsMap.put("doblesFaltasJ3", statsDobles.getDoblesFaltasJ3());
+                    statsMap.put("doblesFaltasJ4", statsDobles.getDoblesFaltasJ4());
+
+                    statsMap.put("primerFaltaJ1", statsDobles.getPrimerFaltaJ1());
+                    statsMap.put("primerFaltaJ2", statsDobles.getPrimerFaltaJ2());
+                    statsMap.put("primerFaltaJ3", statsDobles.getPrimerFaltaJ3());
+                    statsMap.put("primerFaltaJ4", statsDobles.getPrimerFaltaJ4());
+
+                    statsMap.put("errorForzadoJ1", statsDobles.getErrorForzadoJ1());
+                    statsMap.put("errorForzadoJ2", statsDobles.getErrorForzadoJ2());
+                    statsMap.put("errorForzadoJ3", statsDobles.getErrorForzadoJ3());
+                    statsMap.put("errorForzadoJ4", statsDobles.getErrorForzadoJ4());
                 } else {
-                    statsMap.put("acesJ1", 0); statsMap.put("acesJ2", 0);
-                    statsMap.put("winnersJ1", 0); statsMap.put("winnersJ2", 0);
-                    statsMap.put("erroresJ1", 0); statsMap.put("erroresJ2", 0);
-                    statsMap.put("doblesFaltasJ1", 0); statsMap.put("doblesFaltasJ2", 0);
+                    for (int i = 1; i <= 4; i++) {
+                        statsMap.put("acesJ" + i, 0);
+                        statsMap.put("winnersJ" + i, 0);
+                        statsMap.put("erroresJ" + i, 0);
+                        statsMap.put("doblesFaltasJ" + i, 0);
+                        statsMap.put("primerFaltaJ1", 0);
+                        statsMap.put("errorForzadoJ" + i, 0);
+                    }
                 }
-
+            }
                 partidoDTO.put("estadisticas", statsMap);
-
                 partidosPorRonda.computeIfAbsent(nombreRonda, k -> new ArrayList<>()).add(partidoDTO);
             }
 
-            // 3. Estructura JSON final para JavaScript
             List<Map<String, Object>> rondasDTO = new ArrayList<>();
             for (Map.Entry<String, List<Map<String, Object>>> entry : partidosPorRonda.entrySet()) {
                 Map<String, Object> rondaObj = new HashMap<>();

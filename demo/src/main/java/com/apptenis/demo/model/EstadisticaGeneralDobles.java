@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "estadisticas_generales")
+@Table(name = "estadisticas_generales_dobles")
 @Data
-public class EstadisticaGeneral {
+public class EstadisticaGeneralDobles {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

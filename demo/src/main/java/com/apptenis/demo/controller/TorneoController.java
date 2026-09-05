@@ -22,6 +22,9 @@ public class TorneoController {
     private EstadisticaGeneralRepository estadisticaGeneralRepository;
 
     @Autowired
+    private EstadisticaGeneralDoblesRepository estadisticaGeneralDoblesRepository;
+
+    @Autowired
     private TorneoRepository torneoRepository;
 
     @Autowired
@@ -506,6 +509,8 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
             // 1. DETERMINAR GANADOR
             // =========================================================================
             Usuario ganadorRep = null;
+            boolean ganaPareja1 = false; // Declaradas aquí para estar disponibles en todo el flujo
+            boolean ganaPareja2 = false;
 
             if (!esDobles) {
                 // SENCILLOS
@@ -518,22 +523,16 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
                 }
             } else {
                 // DOBLES
-                boolean ganaPareja1 = false;
-                boolean ganaPareja2 = false;
-
-                // Verificar si ganó algún integrante de Pareja 1 (jugador1 o jugador2)
                 if ((partido.getJugador1() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador1().getUsuario().toLowerCase())) ||
                     (partido.getJugador2() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador2().getUsuario().toLowerCase()))) {
                     ganaPareja1 = true;
                 }
 
-                // Verificar si ganó algún integrante de Pareja 2 (jugador3 o jugador4)
                 if ((partido.getJugador3() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador3().getUsuario().toLowerCase())) ||
                     (partido.getJugador4() != null && ganadorEnviado.toLowerCase().contains(partido.getJugador4().getUsuario().toLowerCase()))) {
                     ganaPareja2 = true;
                 }
 
-                // Usar a jugador1 como representante de Pareja 1, o jugador3 para Pareja 2
                 if (ganaPareja1) {
                     ganadorRep = partido.getJugador1();
                 } else if (ganaPareja2) {
@@ -547,28 +546,73 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
             // 2. GUARDAR ESTADÍSTICAS DEL PARTIDO (Se persisten para Sencillos y Dobles)
             // =========================================================================
             try {
-                if (partido.getEstadisticas() == null) {
-                    partido.setEstadisticas(new EstadisticaPartido());
-                }
+                if (!esDobles) {
+                    if (partido.getEstadisticas() == null) partido.setEstadisticas(new EstadisticaPartido());
+                    EstadisticaPartido ep = partido.getEstadisticas();
 
-                EstadisticaPartido ep = partido.getEstadisticas();
+                    if (datos.get("statsJ1") != null) {
+                        Map<String, Object> s1 = (Map<String, Object>) datos.get("statsJ1");
+                        ep.setAcesJ1(Integer.parseInt(s1.getOrDefault("ace", 0).toString()));
+                        ep.setDoblesFaltasJ1(Integer.parseInt(s1.getOrDefault("dobleFalta", 0).toString()));
+                        ep.setErroresNoForzadosJ1(Integer.parseInt(s1.getOrDefault("errorNo", 0).toString()));
+                        ep.setWinnersJ1(Integer.parseInt(s1.getOrDefault("winner", 0).toString()));
+                        ep.setPrimerFaltaJ1(Integer.parseInt(s1.getOrDefault("primerFalta", 0).toString()));
+                        ep.setErrorForzadoJ1(Integer.parseInt(s1.getOrDefault("errorForzado", 0).toString()));
+                    }
 
-                if (datos.get("statsJ1") != null) {
-                    Map<String, Object> s1 = (Map<String, Object>) datos.get("statsJ1");
-                    ep.setAcesJ1(Integer.parseInt(s1.getOrDefault("ace", 0).toString()));
-                    ep.setDoblesFaltasJ1(Integer.parseInt(s1.getOrDefault("dobleFalta", 0).toString()));
-                    ep.setErroresNoForzadosJ1(Integer.parseInt(s1.getOrDefault("errorNo", 0).toString()));
-                    ep.setPuntosEnRedJ1(Integer.parseInt(s1.getOrDefault("red", 0).toString()));
-                    ep.setWinnersJ1(Integer.parseInt(s1.getOrDefault("winner", 0).toString()));
-                }
+                    if (datos.get("statsJ2") != null) {
+                        Map<String, Object> s2 = (Map<String, Object>) datos.get("statsJ2");
+                        ep.setAcesJ2(Integer.parseInt(s2.getOrDefault("ace", 0).toString()));
+                        ep.setDoblesFaltasJ2(Integer.parseInt(s2.getOrDefault("dobleFalta", 0).toString()));
+                        ep.setErroresNoForzadosJ2(Integer.parseInt(s2.getOrDefault("errorNo", 0).toString()));
+                        ep.setWinnersJ2(Integer.parseInt(s2.getOrDefault("winner", 0).toString()));
+                        ep.setPrimerFaltaJ2(Integer.parseInt(s2.getOrDefault("primerFalta", 0).toString()));
+                        ep.setErrorForzadoJ2(Integer.parseInt(s2.getOrDefault("errorForzado", 0).toString()));
+                    }
+                } else {
+                    // Mapeo para partidos de Dobles
+                    if (partido.getEstadisticasDobles() == null) partido.setEstadisticasDobles(new EstadisticaPartidoDobles());
+                    EstadisticaPartidoDobles epd = partido.getEstadisticasDobles();
 
-                if (datos.get("statsJ2") != null) {
-                    Map<String, Object> s2 = (Map<String, Object>) datos.get("statsJ2");
-                    ep.setAcesJ2(Integer.parseInt(s2.getOrDefault("ace", 0).toString()));
-                    ep.setDoblesFaltasJ2(Integer.parseInt(s2.getOrDefault("dobleFalta", 0).toString()));
-                    ep.setErroresNoForzadosJ2(Integer.parseInt(s2.getOrDefault("errorNo", 0).toString()));
-                    ep.setPuntosEnRedJ2(Integer.parseInt(s2.getOrDefault("red", 0).toString()));
-                    ep.setWinnersJ2(Integer.parseInt(s2.getOrDefault("winner", 0).toString()));
+                    // Pareja 1: J1 y J2
+                    if (datos.get("statsJ1") != null) { // statsJ1 corresponde a J1 (Pareja 1A)
+                        Map<String, Object> s1 = (Map<String, Object>) datos.get("statsJ1");
+                        epd.setAcesJ1(Integer.parseInt(s1.getOrDefault("ace", 0).toString()));
+                        epd.setDoblesFaltasJ1(Integer.parseInt(s1.getOrDefault("dobleFalta", 0).toString()));
+                        epd.setErroresNoForzadosJ1(Integer.parseInt(s1.getOrDefault("errorNo", 0).toString()));
+                        epd.setWinnersJ1(Integer.parseInt(s1.getOrDefault("winner", 0).toString()));
+                        epd.setPrimerFaltaJ1(Integer.parseInt(s1.getOrDefault("primerFalta", 0).toString()));
+                        epd.setErrorForzadoJ1(Integer.parseInt(s1.getOrDefault("errorForzado", 0).toString()));
+                    }
+                    if (datos.get("statsJ1_B") != null) { // statsJ1_B corresponde a J2 (Pareja 1B)
+                        Map<String, Object> s1b = (Map<String, Object>) datos.get("statsJ1_B");
+                        epd.setAcesJ2(Integer.parseInt(s1b.getOrDefault("ace", 0).toString()));
+                        epd.setDoblesFaltasJ2(Integer.parseInt(s1b.getOrDefault("dobleFalta", 0).toString()));
+                        epd.setErroresNoForzadosJ2(Integer.parseInt(s1b.getOrDefault("errorNo", 0).toString()));
+                        epd.setWinnersJ2(Integer.parseInt(s1b.getOrDefault("winner", 0).toString()));
+                        epd.setPrimerFaltaJ2(Integer.parseInt(s1b.getOrDefault("primerFalta", 0).toString()));
+                        epd.setErrorForzadoJ2(Integer.parseInt(s1b.getOrDefault("errorForzado", 0).toString()));
+                    }
+
+                    // Pareja 2: J3 y J4
+                    if (datos.get("statsJ2") != null) { // statsJ2 corresponde a J3 (Pareja 2A)
+                        Map<String, Object> s2 = (Map<String, Object>) datos.get("statsJ2");
+                        epd.setAcesJ3(Integer.parseInt(s2.getOrDefault("ace", 0).toString()));
+                        epd.setDoblesFaltasJ3(Integer.parseInt(s2.getOrDefault("dobleFalta", 0).toString()));
+                        epd.setErroresNoForzadosJ3(Integer.parseInt(s2.getOrDefault("errorNo", 0).toString()));
+                        epd.setWinnersJ3(Integer.parseInt(s2.getOrDefault("winner", 0).toString()));
+                        epd.setPrimerFaltaJ3(Integer.parseInt(s2.getOrDefault("primerFalta", 0).toString()));
+                        epd.setErrorForzadoJ3(Integer.parseInt(s2.getOrDefault("errorForzado", 0).toString()));
+                    }
+                    if (datos.get("statsJ2_B") != null) { // statsJ2_B corresponde a J4 (Pareja 2B)
+                        Map<String, Object> s2b = (Map<String, Object>) datos.get("statsJ2_B");
+                        epd.setAcesJ4(Integer.parseInt(s2b.getOrDefault("ace", 0).toString()));
+                        epd.setDoblesFaltasJ4(Integer.parseInt(s2b.getOrDefault("dobleFalta", 0).toString()));
+                        epd.setErroresNoForzadosJ4(Integer.parseInt(s2b.getOrDefault("errorNo", 0).toString()));
+                        epd.setWinnersJ4(Integer.parseInt(s2b.getOrDefault("winner", 0).toString()));
+                        epd.setPrimerFaltaJ4(Integer.parseInt(s2b.getOrDefault("primerFalta", 0).toString()));
+                        epd.setErrorForzadoJ4(Integer.parseInt(s2b.getOrDefault("errorForzado", 0).toString()));
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("⚠️ Error al mapear estadísticas del encuentro: " + e.getMessage());
@@ -580,13 +624,26 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
             // 3. HISTÓRICO GENERAL (ÚNICAMENTE SI NO ES DOBLES)
             // =========================================================================
             if (!esDobles) {
+                // Sencillos -> Guarda en EstadisticaGeneral
                 if (partido.getJugador1() != null && datos.get("statsJ1") != null) {
-                    Map<String, Object> s1 = (Map<String, Object>) datos.get("statsJ1");
-                    actualizarEstadisticasGlobales(partido.getJugador1(), s1, partido.getJugador1().equals(ganadorRep));
+                    actualizarEstadisticasGlobales(partido.getJugador1(), (Map<String, Object>) datos.get("statsJ1"), partido.getJugador1().equals(ganadorRep));
                 }
                 if (partido.getJugador2() != null && datos.get("statsJ2") != null) {
-                    Map<String, Object> s2 = (Map<String, Object>) datos.get("statsJ2");
-                    actualizarEstadisticasGlobales(partido.getJugador2(), s2, partido.getJugador2().equals(ganadorRep));
+                    actualizarEstadisticasGlobales(partido.getJugador2(), (Map<String, Object>) datos.get("statsJ2"), partido.getJugador2().equals(ganadorRep));
+                }
+            } else {
+                // Dobles -> Guarda en EstadisticaGeneralDobles
+                if (partido.getJugador1() != null && datos.get("statsJ1") != null) {
+                    actualizarEstadisticasGlobalesDobles(partido.getJugador1(), (Map<String, Object>) datos.get("statsJ1"), ganaPareja1);
+                }
+                if (partido.getJugador2() != null && datos.get("statsJ1_B") != null) {
+                    actualizarEstadisticasGlobalesDobles(partido.getJugador2(), (Map<String, Object>) datos.get("statsJ1_B"), ganaPareja1);
+                }
+                if (partido.getJugador3() != null && datos.get("statsJ2") != null) {
+                    actualizarEstadisticasGlobalesDobles(partido.getJugador3(), (Map<String, Object>) datos.get("statsJ2"), ganaPareja2);
+                }
+                if (partido.getJugador4() != null && datos.get("statsJ2_B") != null) {
+                    actualizarEstadisticasGlobalesDobles(partido.getJugador4(), (Map<String, Object>) datos.get("statsJ2_B"), ganaPareja2);
                 }
             }
 
@@ -597,7 +654,6 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
             if (rondaActual != null && rondaActual.getTorneo() != null) {
                 Torneo torneo = rondaActual.getTorneo();
 
-                // 1. Obtener y ORDENAR los partidos de la ronda actual por su ID
                 List<Partido> partidosRondaActual = rondaActual.getPartidos().stream()
                         .sorted(java.util.Comparator.comparing(Partido::getId))
                         .collect(java.util.stream.Collectors.toList());
@@ -612,43 +668,30 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
                             .findFirst();
 
                     if (siguienteRondaOpt.isPresent()) {
-                        // 2. Obtener y ORDENAR los partidos de la siguiente ronda por su ID
                         List<Partido> partidosSiguienteRonda = siguienteRondaOpt.get().getPartidos().stream()
                                 .sorted(java.util.Comparator.comparing(Partido::getId))
                                 .collect(java.util.stream.Collectors.toList());
 
-                        // 3. Índice matemático del partido destino: 0 y 1 van al 0, 2 y 3 van al 1, etc.
                         int indiceSiguientePartido = indicePartidoActual / 2;
 
                         if (indiceSiguientePartido < partidosSiguienteRonda.size()) {
                             Partido partidoSiguiente = partidosSiguienteRonda.get(indiceSiguientePartido);
-
-                            // 4. Determinar si la llave actual es PAR (Jugador1/3) o IMPAR (Jugador2/4)
                             boolean esPosicion1 = (indicePartidoActual % 2 == 0);
 
                             if (!esDobles) {
-                                // --- SENCILLOS ---
                                 if (esPosicion1) {
                                     partidoSiguiente.setJugador1(ganadorRep);
                                 } else {
                                     partidoSiguiente.setJugador2(ganadorRep);
                                 }
                             } else {
-                                // --- DOBLES ---
-                                // Detección correcta: La Pareja 1 la forman jugador1 y jugador2
-                                boolean ganaPareja1 = (partido.getJugador1() != null && partido.getJugador1().equals(ganadorRep))
-                                                || (partido.getJugador2() != null && partido.getJugador2().equals(ganadorRep));
-
-                                // Si gana Pareja 1: (jugador1, jugador2) | Si gana Pareja 2: (jugador3, jugador4)
                                 Usuario integrante1 = ganaPareja1 ? partido.getJugador1() : partido.getJugador3();
                                 Usuario integrante2 = ganaPareja1 ? partido.getJugador2() : partido.getJugador4();
 
                                 if (esPosicion1) {
-                                    // Pasa a ocupar el lado de Pareja 1 en el siguiente partido
                                     partidoSiguiente.setJugador1(integrante1);
                                     partidoSiguiente.setJugador2(integrante2);
                                 } else {
-                                    // Pasa a ocupar el lado de Pareja 2 en el siguiente partido
                                     partidoSiguiente.setJugador3(integrante1);
                                     partidoSiguiente.setJugador4(integrante2);
                                 }
@@ -665,6 +708,28 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
         .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 }
 
+    private void actualizarEstadisticasGlobalesDobles(Usuario usuario, Map<String, Object> stats, boolean esGanador) {
+        EstadisticaGeneralDobles globalDobles = estadisticaGeneralDoblesRepository.findByUsuario(usuario)
+                .orElseGet(() -> {
+                    EstadisticaGeneralDobles nuevo = new EstadisticaGeneralDobles();
+                    nuevo.setUsuario(usuario);
+                    return nuevo;
+                });
+
+        globalDobles.setPartidosJugados(globalDobles.getPartidosJugados() + 1);
+        if (esGanador) {
+            globalDobles.setPartidosGanados(globalDobles.getPartidosGanados() + 1);
+        }
+
+        globalDobles.setAces(globalDobles.getAces() + Integer.parseInt(stats.getOrDefault("ace", 0).toString()));
+        globalDobles.setDoblesFaltas(globalDobles.getDoblesFaltas() + Integer.parseInt(stats.getOrDefault("dobleFalta", 0).toString()));
+        globalDobles.setErroresNoForzados(globalDobles.getErroresNoForzados() + Integer.parseInt(stats.getOrDefault("errorNo", 0).toString()));
+        globalDobles.setWinners(globalDobles.getWinners() + Integer.parseInt(stats.getOrDefault("winner", 0).toString()));
+        globalDobles.setPrimerFalta(globalDobles.getPrimerFalta() + Integer.parseInt(stats.getOrDefault("primerFalta", 0).toString()));
+        globalDobles.setErrorForzado(globalDobles.getErrorForzado() + Integer.parseInt(stats.getOrDefault("errorForzado", 0).toString()));
+
+        estadisticaGeneralDoblesRepository.save(globalDobles);
+    }
 
     private void actualizarEstadisticasGlobales(Usuario usuario, Map<String, Object> stats, boolean esGanador) {
         EstadisticaGeneral global = estadisticaGeneralRepository.findByUsuario(usuario)
@@ -684,7 +749,6 @@ public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestBody Ma
         global.setErroresNoForzados(global.getErroresNoForzados() + Integer.parseInt(stats.getOrDefault("errorNo", 0).toString()));
         
         // Si en EstadisticaGeneral lo llamaste 'red', déjalo así. Si lo llamaste 'puntosEnRed', cámbialo a setPuntosEnRed
-        global.setRed(global.getRed() + Integer.parseInt(stats.getOrDefault("red", 0).toString())); 
         
         global.setWinners(global.getWinners() + Integer.parseInt(stats.getOrDefault("winner", 0).toString()));
 

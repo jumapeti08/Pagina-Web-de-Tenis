@@ -1,212 +1,124 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <title>Marcador de Tenis</title>
+    <title>Marcador de Tenis - Juez</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="pantalla">
-        <div class="jugador">
-            <h1 id="nombreJ1">Cargando...</h1>
-            <div class="marcador-principal">
-                <div class="item"><span>Games</span><p id="sumarGameJug1">0</p></div>
-                <div class="item"><span>Sets</span><p id="setJug1">0</p></div>
+    <div class="orientacion-aviso">
+        <p>📱 Por favor, gira tu dispositivo a posición horizontal</p>
+    </div>
+
+    <div class="app-container">
+        <!-- BARRA SUPERIOR DE CONTROL -->
+        <div class="top-bar">
+            <button class="btn-deshacer" onclick="deshacerUltimaAccion()">↩️ Devolver Última Acción</button>
+            <span id="estado" class="badge-estado">EN_JUEGO</span>
+        </div>
+
+        <!-- PANEL PRINCIPAL DE JUEGO -->
+        <div class="pantalla">
+            <!-- JUGADOR / EQUIPO 1 -->
+            <div class="jugador">
+                <h1 id="nombreJ1">Cargando...</h1>
+                
+                <!-- SELECTOR DE JUGADOR EN DOBLES (E1) -->
+                <div id="selector-dobles-e1" style="display: none; margin-bottom: 5px;">
+                    <label style="font-size: 0.7rem; color: #a0a0a0;">Acción realizada por:</label>
+                    <select id="select-jugador-e1" style="width: 100%; padding: 3px; font-size: 0.8rem; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
+                        <!-- Se llena dinámicamente -->
+                    </select>
+                </div>
+
+                <div class="marcador-principal">
+                    <div class="item"><span>Games</span><p id="sumarGameJug1">0</p></div>
+                    <div class="item"><span>Sets</span><p id="setJug1">0</p></div>
+                </div>
+                
+                <div class="puntos-control">
+                    <button class="btn-sumar" onclick="sumarJugador1()">+ Puntos E1</button>
+                    <p class="puntaje" id="puntaje1">0</p>
+                </div>
+
+                <div class="panel-stats">
+                    <button class="btn-s ace" onclick="registrarStat(1, 'ace')">Ace</button>
+                    <button class="btn-s doble" onclick="registrarStat(1, 'dobleFalta')">D. Falta</button>
+                    <button class="btn-s primer-falta" onclick="registrarStat(1, '1raFalta')">1ra Falta</button>
+                    <button class="btn-s error-no" onclick="registrarStat(1, 'errorNo')">Error No F.</button>
+                    <button class="btn-s error-forzado" onclick="registrarStat(1, 'errorForzado')">Err. Forzado</button>
+                    <button class="btn-s winner" onclick="registrarStat(1, 'winner')">Winner</button>
+                </div>
             </div>
-            <div class="puntos-control">
-                <button class="btn-circular" onclick="restarJugador1()">-</button>
-                <p class="puntaje" id="puntaje1">0</p>
-                <button class="btn-circular" onclick="sumarJugador1()">+</button>
-            </div>
-            <div class="panel-stats">
-                <button class="btn-s ace" onclick="registrarStat(1, 'ace')">Ace</button>
-                <button class="btn-s doble" onclick="registrarStat(1, 'dobleFalta')">D. Falta</button>
-                <button class="btn-s error" onclick="registrarStat(1, 'errorNo')">Error No F.</button>
-                <button class="btn-s red" onclick="registrarStat(1, 'red')">Red</button>
-                <button class="btn-s winner" onclick="registrarStat(1, 'winner')">Winner</button>
+
+            <div class="divisor"></div>
+
+            <!-- JUGADOR / EQUIPO 2 -->
+            <div class="jugador">
+                <h1 id="nombreJ2">Cargando...</h1>
+
+                <!-- SELECTOR DE JUGADOR EN DOBLES (E2) -->
+                
+
+                <div class="marcador-principal">
+                    <div class="item"><span>Games</span><p id="sumarGameJug2">0</p></div>
+                    <div class="item"><span>Sets</span><p id="setJug2">0</p></div>
+                </div>
+
+                <div class="puntos-control">
+                    <p class="puntaje" id="puntaje2">0</p>
+                    <button class="btn-sumar" onclick="sumarJugador2()">+ Puntos E2</button>
+                </div>
+
+                <div class="panel-stats">
+                    <button class="btn-s ace" onclick="registrarStat(2, 'ace')">Ace</button>
+                    <button class="btn-s doble" onclick="registrarStat(2, 'dobleFalta')">D. Falta</button>
+                    <button class="btn-s primer-falta" onclick="registrarStat(2, '1raFalta')">1ra Falta</button>
+                    <button class="btn-s error-no" onclick="registrarStat(2, 'errorNo')">Error No F.</button>
+                    <button class="btn-s error-forzado" onclick="registrarStat(2, 'errorForzado')">Err. Forzado</button>
+                    <button class="btn-s winner" onclick="registrarStat(2, 'winner')">Winner</button>
+                </div>
             </div>
         </div>
 
-        <div class="divisor"></div>
-
-        <div class="jugador">
-            <h1 id="nombreJ2">Cargando...</h1>
-            <div class="marcador-principal">
-                <div class="item"><span>Games</span><p id="sumarGameJug2">0</p></div>
-                <div class="item"><span>Sets</span><p id="setJug2">0</p></div>
-            </div>
-            <div class="puntos-control">
-                <button class="btn-circular" onclick="restarJugador2()">-</button>
-                <p class="puntaje" id="puntaje2">0</p>
-                <button class="btn-circular" onclick="sumarJugador2()">+</button>
-            </div>
-            <div class="panel-stats">
-                <button class="btn-s ace" onclick="registrarStat(2, 'ace')">Ace</button>
-                <button class="btn-s doble" onclick="registrarStat(2, 'dobleFalta')">D. Falta</button>
-                <button class="btn-s error" onclick="registrarStat(2, 'errorNo')">Error No F.</button>
-                <button class="btn-s red" onclick="registrarStat(2, 'red')">Red</button>
-                <button class="btn-s winner" onclick="registrarStat(2, 'winner')">Winner</button>
-            </div>
+        <!-- FOOTER DE ACCIONES -->
+        <div class="footer-controls">
+            <button class="btn-finalizar" onclick="terminarManual('Normal')">🏁 Terminar Partido</button>
+            <button class="btn-w" onclick="terminarManual('W')">🏆 Ganar por W</button>
+            <button class="btn-r" onclick="terminarManual('R')">🚫 Retiro</button>
+            <button class="btn-su" onclick="terminarManual('Su')">⏸️ Suspender</button>
         </div>
     </div>
 
-    <div class="footer-controls">
-        <button class="btn-finalizar" onclick="terminarManual('Normal')">🏁 Terminar Partido</button>
-        <button class="btn-w" onclick="terminarManual('W')">🏆 Ganar por W</button>
-        <button class="btn-r" onclick="terminarManual('R')">🚫 Retiro</button>
-        <button class="btn-su" onclick="terminarManual('Su')">⏸️ Suspender</button>
-        <p id="estado"></p>
-    </div>
-
-    <div id="modal-stats" class="modal-overlay">
+    <!-- MODAL DE ESTADÍSTICAS -->
+    <div id="modal-stats" class="modal-overlay" style="display:none;">
         <div class="modal-box">
             <h2 class="modal-title">📊 Resumen del Partido</h2>
-            <div class="tablas-wrapper">
-                <div class="tabla-col">
-                    <h3 id="modalNombreJ1" class="jugador-nombre">Jugador 1</h3>
-                    <table id="tabla-j1" class="stats-table"></table>
-                </div>
-                <div class="tabla-col">
-                    <h3 id="modalNombreJ2" class="jugador-nombre">Jugador 2</h3>
-                    <table id="tabla-j2" class="stats-table"></table>
-                </div>
+            <div id="container-tablas" class="tablas-wrapper" style="display: flex; gap: 10px; overflow-x: auto;">
+                <!-- Tablas generadas dinámicamente -->
             </div>
             
-            <div class="modal-actions" style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+            <div class="modal-actions" style="margin-top: 15px;">
                 <button id="btn-guardar-bd" class="btn-finalizar" onclick="guardarYPasarSiguienteRonda()">💾 Guardar Resultado</button>
-                <button class="btn-nuevo-partido" onclick="cerrarStats()" style="background-color: #555;">Salir al Panel</button>
+                <button class="btn-nuevo-partido" onclick="cerrarStats()">Salir al Panel</button>
             </div>
         </div>
     </div>
 
-    <!-- Librerías para WebSockets (¡IMPORTANTE: Cargar antes de tu script.js!) -->
+    <div id="modal-seleccion-jugador" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: #1e1e1e; color: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 320px; text-align: center; border: 1px solid #444;">
+            <h3 style="margin-top: 0; font-size: 1.1rem;">¿Quién realizó la acción?</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <button id="btn-jugador-1" style="padding: 12px; font-size: 1rem; border: none; border-radius: 5px; background-color: #28a745; color: white; cursor: pointer;"></button>
+                <button id="btn-jugador-2" style="padding: 12px; font-size: 1rem; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;"></button>
+                <button onclick="cerrarModalSeleccion()" style="padding: 8px; font-size: 0.9rem; border: none; border-radius: 5px; background-color: #6c757d; color: white; cursor: pointer; margin-top: 5px;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-
     <script src="script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const matchId = urlParams.get('matchId');
-
-            if (!matchId) {
-                alert("Error: No se especificó un ID de partido.");
-                window.location.href = "panel-juez.html";
-                return;
-            }
-
-            localStorage.setItem('partidoIdEnCurso', matchId);
-
-            try {
-                console.log("Cargando y verificando partido:", matchId);
-                
-                // 1. Consumimos el endpoint de verificación para validar si el juez puede entrar
-                const response = await fetch(`/api/torneos/partidos/${matchId}/verificar-arbitraje`);
-                
-                if (!response.ok) {
-                    throw new Error("Error en la respuesta del servidor.");
-                }
-                
-                const data = await response.json();
-                console.log("Datos de verificación recibidos:", data);
-
-                if (data.permitido === false) {
-                    alert(`⚠️ Acceso denegado:\n${data.mensaje}`);
-                    window.location.href = "panel-juez.html";
-                    return;
-                }
-
-                // Guardamos el estado en el que venía (PROGRAMADO o SUSPENDIDO) antes de cambiarlo
-                const estadoOriginal = data.estado;
-
-                // =========================================================================
-                // 🔥 SOLUCIÓN CRÍTICA: Traer el objeto PARTIDO completo de la Base de Datos
-                // =========================================================================
-                const respPartido = await fetch(`/api/torneos/partidos/${matchId}`);
-                if (!respPartido.ok) throw new Error("No se pudieron obtener los datos detallados del partido.");
-                const partidoCompleto = await respPartido.json();
-
-                // =========================================================================
-                // 🔥 SOLUCIÓN DOBLES: Formatear nombres según tipo de modalidad
-                // =========================================================================
-                let n1 = data.jugador1 || "Jugador 1";
-                let n2 = data.jugador2 || "Jugador 2";
-
-                if (data.tipoModalidad === "Dobles") {
-                    const j1 = data.jugador1 || "Invitado 1";
-                    const j2 = data.jugador2 || "Invitado 2";
-                    const j3 = data.jugador3 || "Invitado 3";
-                    const j4 = data.jugador4 || "Invitado 4";
-
-                    n1 = `${j1} / ${j2}`;
-                    n2 = `${j3} / ${j4}`;
-                }
-
-                document.getElementById('nombreJ1').innerText = n1;
-                document.getElementById('nombreJ2').innerText = n2;
-                
-                if (document.getElementById('modalNombreJ1')) {
-                    document.getElementById('modalNombreJ1').innerText = n1;
-                    document.getElementById('modalNombreJ2').innerText = n2;
-                }
-                // =========================================================================
-
-                // 2. Cambiar el estado del partido a EN_CURSO en el servidor de inmediato
-                await cambiarEstadoPartidoAEnCurso(matchId);
-
-                // 3. Montar los puntos, games y sets que estaban guardados en la BD (si existen)
-                if (typeof cargarDatosPartidoExistente === 'function') {
-                    cargarDatosPartidoExistente(partidoCompleto);
-                }
-
-                // 4. ¿Preguntar por el servicio inicial?
-                // SOLO se pregunta si es un partido nuevo de paquete (PROGRAMADO y sin marcadores en BD)
-                const tieneProgreso = partidoCompleto.puntosActualesJ1 || partidoCompleto.setsGanadosJ1 > 0 || partidoCompleto.setsGanadosJ2 > 0;
-                
-                if (estadoOriginal === "PROGRAMADO" && !tieneProgreso) {
-                    preguntarServicioInicial(n1, n2);
-                } else {
-                    console.log("Reanudando partido suspendido o con datos previos. Se mantiene el saque/marcador de la BD.");
-                    if (typeof actualizarBotonesServicio === 'function') {
-                        actualizarBotonesServicio();
-                    }
-                }
-
-            } catch (error) {
-                console.error("Error cargando el partido:", error);
-                alert("Hubo un error de red o de base de datos al inicializar el arbitraje.");
-                window.location.href = "panel-juez.html";
-            }
-        });
-
-        // Función para cambiar el estado a EN_CURSO en la BD
-        async function cambiarEstadoPartidoAEnCurso(id) {
-            try {
-                await fetch(`/api/torneos/partidos/${id}/cambiar-estado`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ estado: "EN_CURSO" })
-                });
-                console.log("Estado cambiado con éxito a: EN_CURSO");
-            } catch (err) {
-                console.error("No se pudo actualizar el estado en el servidor:", err);
-            }
-        }
-
-        // Función interactiva para definir el saque inicial
-        function preguntarServicioInicial(jugador1, jugador2) {
-            let seleccion = prompt(`¿Quién inicia sirviendo?\n1. ${jugador1}\n2. ${jugador2}`, "1");
-            
-            if (typeof marcarServicio === 'function') {
-                if (seleccion === "2") marcarServicio(2);
-                else marcarServicio(1);
-            } else if (typeof preguntarServicio === 'function') {
-                preguntarServicio(jugador1, jugador2);
-            } else {
-                console.log(`Servicio asignado al jugador: ${seleccion === "2" ? jugador2 : jugador1}`);
-            }
-        }
-    </script>
 </body>
 </html>

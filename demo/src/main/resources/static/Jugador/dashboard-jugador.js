@@ -61,7 +61,10 @@ function seleccionarOpcion(elemento, opcion) {
     }
 }
 
-async function cargarMisEstadisticas() {
+// ----------------------------------------------------
+// MIS ESTADÍSTICAS (Con Selector Sencillos/Dobles)
+// ----------------------------------------------------
+async function cargarMisEstadisticas(modalidad = "SENCILLOS") {
     const container = document.getElementById("dynamic-container");
     const username = localStorage.getItem("username");
 
@@ -70,118 +73,52 @@ async function cargarMisEstadisticas() {
         return;
     }
 
-    // Animación de pelota rebotando durante la carga
+    // Dibujamos el selector de modalidad en la parte superior
     container.innerHTML = `
-        <div class="tennis-loader">
-            <div class="tennis-ball-animated"></div>
-            <p>OBTENIENDO ESTADÍSTICAS...</p>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-toggle-mod ${modalidad === 'SENCILLOS' ? 'active' : ''}" 
+                    onclick="cargarMisEstadisticas('SENCILLOS')"
+                    style="padding: 8px 18px; border-radius: 20px; border: 1px solid #d4f01e; background: ${modalidad === 'SENCILLOS' ? '#d4f01e' : 'transparent'}; color: ${modalidad === 'SENCILLOS' ? '#000' : '#fff'}; font-weight: bold; cursor: pointer;">
+                🎾 Sencillos
+            </button>
+            <button class="btn-toggle-mod ${modalidad === 'DOBLES' ? 'active' : ''}" 
+                    onclick="cargarMisEstadisticas('DOBLES')"
+                    style="padding: 8px 18px; border-radius: 20px; border: 1px solid #d4f01e; background: ${modalidad === 'DOBLES' ? '#d4f01e' : 'transparent'}; color: ${modalidad === 'DOBLES' ? '#000' : '#fff'}; font-weight: bold; cursor: pointer;">
+                👥 Dobles
+            </button>
+        </div>
+        <div id="stats-content-area">
+            <div class="tennis-loader">
+                <div class="tennis-ball-animated"></div>
+                <p>OBTENIENDO ESTADÍSTICAS (${modalidad})...</p>
+            </div>
         </div>
     `;
 
+    const contentArea = document.getElementById("stats-content-area");
+
     try {
-        const response = await fetch(`/api/usuarios/${username}/estadisticas-globales`);
+        // Se envía la modalidad como Query Parameter al backend
+        const response = await fetch(`/api/usuarios/${username}/estadisticas-globales?modalidad=${modalidad}`);
         if (!response.ok) throw new Error("Sin datos");
 
         const data = await response.json();
+        contentArea.innerHTML = generarHTMLMetricas(data);
 
-        container.innerHTML = `
-            <div class="stats-container">
-                <div class="hero-summary-grid">
-                    <div class="hero-card win">
-                        <i class="fa-solid fa-trophy"></i>
-                        <div class="hero-title">Victorias</div>
-                        <div class="hero-value">${data.partidosGanados}</div>
-                    </div>
-                    <div class="hero-card loss">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                        <div class="hero-title">Derrotas</div>
-                        <div class="hero-value">${data.partidosPerdidos}</div>
-                    </div>
-                    <div class="hero-card rate">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <div class="hero-title">Efectividad</div>
-                        <div class="hero-value">${data.porcentajeVictorias}%</div>
-                    </div>
-                    <div class="hero-card">
-                        <i class="fa-solid fa-hashtag"></i>
-                        <div class="hero-title">Jugados</div>
-                        <div class="hero-value">${data.partidosJugados}</div>
-                    </div>
-                </div>
-
-                <div class="section-subtitle">
-                    <i class="fa-solid fa-chart-simple"></i> Rendimiento Promedio por Partido
-                </div>
-
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Aces / Serv. Ganadores</p>
-                            <div class="metric-avg">${data.promAces} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalAces}</span>
-                        </div>
-                        <div class="metric-icon-box">
-                            <i class="fa-solid fa-bolt"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Dobles Faltas</p>
-                            <div class="metric-avg" style="color: #e74c3c;">${data.promDoblesFaltas} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalDoblesFaltas}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(231, 76, 60, 0.15); color: #e74c3c;">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Errores No Forzados</p>
-                            <div class="metric-avg" style="color: #e67e22;">${data.promErrores} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalErrores}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(230, 126, 34, 0.15); color: #e67e22;">
-                            <i class="fa-solid fa-ban"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Tiros Ganadores (Winners)</p>
-                            <div class="metric-avg" style="color: #2ecc71;">${data.promWinners} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalWinners}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(46, 204, 113, 0.15); color: #2ecc71;">
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Puntos en Red</p>
-                            <div class="metric-avg" style="color: #3498db;">${data.promPuntosRed} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalPuntosRed}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(52, 152, 219, 0.15); color: #3498db;">
-                            <i class="fa-solid fa-border-all"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
     } catch (err) {
-        container.innerHTML = `
+        contentArea.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-muted);">
                 <i class="fa-solid fa-circle-info" style="font-size: 35px; color: var(--clay-light); margin-bottom: 10px;"></i>
-                <h2>Sin datos de partidos</h2>
-                <p>Juega tus primeros partidos para ver aquí tus estadísticas calculadas.</p>
+                <h2>Sin datos de partidos (${modalidad.toLowerCase()})</h2>
+                <p>Juega tus primeros partidos en esta modalidad para ver aquí tus estadísticas calculadas.</p>
             </div>
         `;
     }
 }
 
+// ----------------------------------------------------
+// STATS DE OTROS JUGADORES (Con Selector Sencillos/Dobles)
+// ----------------------------------------------------
 function renderizarBuscadorJugadores() {
     const container = document.getElementById("dynamic-container");
     container.innerHTML = `
@@ -208,8 +145,6 @@ function renderizarBuscadorJugadores() {
     `;
 }
 
-// Búsqueda en tiempo real (Autocompletado)
-// Búsqueda en tiempo real (Autocompletado)
 async function buscarJugadores(query) {
     const dropdown = document.getElementById("search-results-dropdown");
     const term = query.trim();
@@ -230,7 +165,7 @@ async function buscarJugadores(query) {
             dropdown.innerHTML = `<div class="search-item-empty">No se encontraron jugadores</div>`;
         } else {
             dropdown.innerHTML = jugadores.map(j => `
-                <div class="search-item" onclick="seleccionarRival('${j.usuario}', '${j.usuario}')">
+                <div class="search-item" onclick="seleccionarRival('${j.usuario}', '${j.usuario}', 'SENCILLOS')">
                     <i class="fa-solid fa-user"></i>
                     <span>${j.usuario}</span>
                 </div>
@@ -243,122 +178,162 @@ async function buscarJugadores(query) {
     }
 }
 
-// Carga las estadísticas del jugador seleccionado
-async function seleccionarRival(targetUsername, nombreMostrar) {
+async function seleccionarRival(targetUsername, nombreMostrar, modalidad = "SENCILLOS") {
     const dropdown = document.getElementById("search-results-dropdown");
     const input = document.getElementById("player-search-input");
     const container = document.getElementById("rival-stats-container");
 
-    input.value = nombreMostrar;
-    dropdown.style.display = "none";
+    if (input) input.value = nombreMostrar;
+    if (dropdown) dropdown.style.display = "none";
 
     container.innerHTML = `
-        <div class="tennis-loader">
-            <div class="tennis-ball-animated"></div>
-            <p>CARGANDO DATOS DE ${nombreMostrar.toUpperCase()}...</p>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-toggle-mod ${modalidad === 'SENCILLOS' ? 'active' : ''}" 
+                    onclick="seleccionarRival('${targetUsername}', '${nombreMostrar}', 'SENCILLOS')"
+                    style="padding: 8px 18px; border-radius: 20px; border: 1px solid #d4f01e; background: ${modalidad === 'SENCILLOS' ? '#d4f01e' : 'transparent'}; color: ${modalidad === 'SENCILLOS' ? '#000' : '#fff'}; font-weight: bold; cursor: pointer;">
+                🎾 Sencillos
+            </button>
+            <button class="btn-toggle-mod ${modalidad === 'DOBLES' ? 'active' : ''}" 
+                    onclick="seleccionarRival('${targetUsername}', '${nombreMostrar}', 'DOBLES')"
+                    style="padding: 8px 18px; border-radius: 20px; border: 1px solid #d4f01e; background: ${modalidad === 'DOBLES' ? '#d4f01e' : 'transparent'}; color: ${modalidad === 'DOBLES' ? '#000' : '#fff'}; font-weight: bold; cursor: pointer;">
+                👥 Dobles
+            </button>
+        </div>
+        <div id="rival-stats-content">
+            <div class="tennis-loader">
+                <div class="tennis-ball-animated"></div>
+                <p>CARGANDO DATOS DE ${nombreMostrar.toUpperCase()} (${modalidad})...</p>
+            </div>
         </div>
     `;
 
+    const rivalContent = document.getElementById("rival-stats-content");
+
     try {
-        const response = await fetch(`/api/usuarios/${targetUsername}/estadisticas-globales`);
+        const response = await fetch(`/api/usuarios/${targetUsername}/estadisticas-globales?modalidad=${modalidad}`);
         if (!response.ok) throw new Error("Sin datos");
 
         const data = await response.json();
+        rivalContent.innerHTML = generarHTMLMetricas(data, nombreMostrar);
 
-        container.innerHTML = `
-            <div class="stats-container">
-                <div class="hero-summary-grid">
-                    <div class="hero-card win">
-                        <i class="fa-solid fa-trophy"></i>
-                        <div class="hero-title">Victorias</div>
-                        <div class="hero-value">${data.partidosGanados}</div>
-                    </div>
-                    <div class="hero-card loss">
-                        <i class="fa-solid fa-circle-xmark"></i>
-                        <div class="hero-title">Derrotas</div>
-                        <div class="hero-value">${data.partidosPerdidos}</div>
-                    </div>
-                    <div class="hero-card rate">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <div class="hero-title">Efectividad</div>
-                        <div class="hero-value">${data.porcentajeVictorias}%</div>
-                    </div>
-                    <div class="hero-card">
-                        <i class="fa-solid fa-hashtag"></i>
-                        <div class="hero-title">Jugados</div>
-                        <div class="hero-value">${data.partidosJugados}</div>
-                    </div>
-                </div>
-
-                <div class="section-subtitle">
-                    <i class="fa-solid fa-chart-simple"></i> Rendimiento Promedio de ${nombreMostrar}
-                </div>
-
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Aces / Serv. Ganadores</p>
-                            <div class="metric-avg">${data.promAces} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalAces}</span>
-                        </div>
-                        <div class="metric-icon-box"><i class="fa-solid fa-bolt"></i></div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Dobles Faltas</p>
-                            <div class="metric-avg" style="color: #e74c3c;">${data.promDoblesFaltas} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalDoblesFaltas}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(231, 76, 60, 0.15); color: #e74c3c;">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Errores No Forzados</p>
-                            <div class="metric-avg" style="color: #e67e22;">${data.promErrores} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalErrores}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(230, 126, 34, 0.15); color: #e67e22;">
-                            <i class="fa-solid fa-ban"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Tiros Ganadores (Winners)</p>
-                            <div class="metric-avg" style="color: #2ecc71;">${data.promWinners} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalWinners}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(46, 204, 113, 0.15); color: #2ecc71;">
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                    </div>
-
-                    <div class="metric-card">
-                        <div class="metric-info">
-                            <p>Puntos en Red</p>
-                            <div class="metric-avg" style="color: #3498db;">${data.promPuntosRed} <small>/partido</small></div>
-                            <span class="metric-total-badge">Total: ${data.totalPuntosRed}</span>
-                        </div>
-                        <div class="metric-icon-box" style="background: rgba(52, 152, 219, 0.15); color: #3498db;">
-                            <i class="fa-solid fa-border-all"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
     } catch (err) {
-        container.innerHTML = `
+        rivalContent.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-muted);">
                 <i class="fa-solid fa-circle-info" style="font-size: 35px; color: var(--clay-light); margin-bottom: 10px;"></i>
-                <h2>Sin registros</h2>
-                <p>Este jugador aún no tiene datos de partidos registrados.</p>
+                <h2>Sin registros en ${modalidad.toLowerCase()}</h2>
+                <p>Este jugador aún no tiene datos de partidos registrados en esta modalidad.</p>
             </div>
         `;
     }
+}
+
+// ----------------------------------------------------
+// PLANTILLA REUTILIZABLE PARA DIBUJAR LAS TARJETAS
+// ----------------------------------------------------
+// Plantilla reutilizable para renderizar las tarjetas métricas
+function generarHTMLMetricas(data, nombreUsuario = null) {
+    const tituloRendimiento = nombreUsuario ? `Rendimiento Promedio de ${nombreUsuario}` : "Rendimiento Promedio por Partido";
+    
+    return `
+        <div class="stats-container">
+            <!-- Hero Summary Grid -->
+            <div class="hero-summary-grid">
+                <div class="hero-card win">
+                    <i class="fa-solid fa-trophy"></i>
+                    <div class="hero-title">Victorias</div>
+                    <div class="hero-value">${data.partidosGanados ?? 0}</div>
+                </div>
+                <div class="hero-card loss">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <div class="hero-title">Derrotas</div>
+                    <div class="hero-value">${data.partidosPerdidos ?? 0}</div>
+                </div>
+                <div class="hero-card rate">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <div class="hero-title">Efectividad</div>
+                    <div class="hero-value">${data.porcentajeVictorias ?? 0}%</div>
+                </div>
+                <div class="hero-card">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <div class="hero-title">Jugados</div>
+                    <div class="hero-value">${data.partidosJugados ?? 0}</div>
+                </div>
+            </div>
+
+            <div class="section-subtitle">
+                <i class="fa-solid fa-chart-simple"></i> ${tituloRendimiento}
+            </div>
+
+            <!-- Métrica Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <p>Aces / Serv. Ganadores</p>
+                        <div class="metric-avg">${data.promAces ?? 0} <small>/partido</small></div>
+                        <span class="metric-total-badge">Total: ${data.totalAces ?? 0}</span>
+                    </div>
+                    <div class="metric-icon-box"><i class="fa-solid fa-bolt"></i></div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <p>Dobles Faltas</p>
+                        <div class="metric-avg" style="color: #e74c3c;">${data.promDoblesFaltas ?? 0} <small>/partido</small></div>
+                        <span class="metric-total-badge">Total: ${data.totalDoblesFaltas ?? 0}</span>
+                    </div>
+                    <div class="metric-icon-box" style="background: rgba(231, 76, 60, 0.15); color: #e74c3c;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <p>Errores No Forzados</p>
+                        <div class="metric-avg" style="color: #e67e22;">${data.promErrores ?? 0} <small>/partido</small></div>
+                        <span class="metric-total-badge">Total: ${data.totalErrores ?? 0}</span>
+                    </div>
+                    <div class="metric-icon-box" style="background: rgba(230, 126, 34, 0.15); color: #e67e22;">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <p>Tiros Ganadores (Winners)</p>
+                        <div class="metric-avg" style="color: #2ecc71;">${data.promWinners ?? 0} <small>/partido</small></div>
+                        <span class="metric-total-badge">Total: ${data.totalWinners ?? 0}</span>
+                    </div>
+                    <div class="metric-icon-box" style="background: rgba(46, 204, 113, 0.15); color: #2ecc71;">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+
+                <!-- REEMPLAZADO: Primeras Faltas -->
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <p>Primeras Faltas</p>
+                        <div class="metric-avg" style="color: #f39c12;">${data.promPrimerFalta ?? data.promPrimerasFaltas ?? 0} <small>/partido</small></div>
+                        <span class="metric-total-badge">Total: ${data.totalPrimerFalta ?? data.totalPrimerasFaltas ?? 0}</span>
+                    </div>
+                    <div class="metric-icon-box" style="background: rgba(243, 156, 18, 0.15); color: #f39c12;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                </div>
+
+                <!-- NUEVA TARJETA: Puntos / Errores Forzados -->
+                <div class="metric-card">
+                    <div class="metric-info">
+                        <p>Puntos Forzados</p>
+                        <div class="metric-avg" style="color: #3498db;">${data.promPuntoForzado ?? data.promPuntosForzados ?? 0} <small>/partido</small></div>
+                        <span class="metric-total-badge">Total: ${data.totalPuntoForzado ?? data.totalPuntosForzados ?? 0}</span>
+                    </div>
+                    <div class="metric-icon-box" style="background: rgba(52, 152, 219, 0.15); color: #3498db;">
+                        <i class="fa-solid fa-bullseye"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 

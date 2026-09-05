@@ -1,7 +1,6 @@
 package com.apptenis.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,12 +13,18 @@ public class Partido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Estadísticas para Sencillos
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "estadisticas_id")
     private EstadisticaPartido estadisticas = new EstadisticaPartido();
 
+    // Estadísticas para Dobles
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "estadisticas_dobles_id")
+    private EstadisticaPartidoDobles estadisticasDobles = new EstadisticaPartidoDobles();
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ronda_id") // Asegúrate de que coincida con el nombre de la columna en tu BD
+    @JoinColumn(name = "ronda_id")
     @JsonIgnore
     private Ronda ronda;
 
@@ -33,15 +38,15 @@ public class Partido {
     private Usuario jugador2;
 
     @ManyToOne
-    @JoinColumn(name = "jugador3_id") // Se usa si es Dobles (Pareja 1 - J2)
-    private Usuario jugador3; // <- Cambiado de Optional<Usuario> a Usuario
+    @JoinColumn(name = "jugador3_id") // Dobles: Pareja 1 - Jugador 2
+    private Usuario jugador3;
 
     @ManyToOne
-    @JoinColumn(name = "jugador4_id") // Se usa si es Dobles (Pareja 2 - J2)
-    private Usuario jugador4; // <- Cambiado de Optional<Usuario> a Usuario
+    @JoinColumn(name = "jugador4_id") // Dobles: Pareja 2 - Jugador 2
+    private Usuario jugador4;
 
     @ManyToOne
-    @JoinColumn(name = "ganador_id") // Columna en la BD para guardar el objeto Usuario que ganó
+    @JoinColumn(name = "ganador_id")
     private Usuario ganador;
 
     // --- MARCADOR EN VIVO DE TENIS ---
@@ -54,7 +59,7 @@ public class Partido {
     private int gamesSet2J1 = 0;
     private int gamesSet2J2 = 0;
 
-    private int gamesSet3J1 = 0; // Por si se van a un 3er Set definitivo
+    private int gamesSet3J1 = 0;
     private int gamesSet3J2 = 0;
 
     private int setsGanadosJ1 = 0;
@@ -63,7 +68,6 @@ public class Partido {
     private String estado = "PROGRAMADO"; // "PROGRAMADO", "EN_CURSO", "FINALIZADO"
 
     @ManyToOne
-    @JoinColumn(name = "juez_id") // Juez asignado para llevar el partido
+    @JoinColumn(name = "juez_id")
     private Usuario juez;
-
 }

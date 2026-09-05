@@ -8,7 +8,7 @@ function obtenerNombreJugador(jugador) {
     
     return jugador.nombreCompleto || 
            jugador.nombre || 
-           jugador.usuario ||         // 👈 Agregado para coincidir con tu entidad Usuario
+           jugador.usuario || 
            jugador.nombreUsuario || 
            jugador.username || 
            (jugador.usuario && typeof jugador.usuario === 'object' ? (jugador.usuario.nombreCompleto || jugador.usuario.nombre || jugador.usuario.usuario) : null) || 
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function conectarWebSocketVisualizador() {
     const socket = new SockJS('/ws-tenis');
     stompClient = Stomp.over(socket);
-    stompClient.debug = null; // Desactiva los logs excesivos en consola
+    stompClient.debug = null;
     stompClient.connect({}, () => {
         console.log("✅ Visualizador WebSocket conectado.");
     });
@@ -58,37 +58,30 @@ async function cargarPartidosDelTorneo(torneoId) {
             return;
         }
 
-        // 1. ORDENAR LAS RONDAS ASCENDENTEMENTE (Ronda 1, Ronda 2, Ronda 3...)
         const rondasOrdenadas = data.rondas.sort((a, b) => {
             const numA = a.numero ?? a.numeroRonda ?? 0;
             const numB = b.numero ?? b.numeroRonda ?? 0;
             return numA - numB;
         });
 
-        // 2. RENDERIZAR RONDAS Y SUS PARTIDOS
         rondasOrdenadas.forEach(ronda => {
             const rondaDiv = document.createElement("div");
             rondaDiv.className = "ronda-seccion";
 
             let partidosHTML = `<h3 class="ronda-titulo">${ronda.nombreRonda || 'Ronda ' + (ronda.numero || '')}</h3><div class="partidos-grid">`;
-
-            // Ordenar partidos dentro de la ronda por su ID si vienen desordenados
             const partidosOrdenados = (ronda.partidos || []).sort((a, b) => a.id - b.id);
 
             partidosOrdenados.forEach(p => {
                 partidosMap.set(p.id, p);
 
-                // Soporte para Sencillos y Dobles en las tarjetas
                 let textoEnfrentamiento = "";
-                if (p.jugador3 || p.jugador4) {
-                    // Dobles
+                if (p.esDobles || p.jugador3 || p.jugador4) {
                     const j1 = obtenerNombreJugador(p.jugador1);
                     const j2 = obtenerNombreJugador(p.jugador2);
                     const j3 = obtenerNombreJugador(p.jugador3);
                     const j4 = obtenerNombreJugador(p.jugador4);
                     textoEnfrentamiento = `[${j1} / ${j2}] <span style="color:#d4f01e;">vs</span> [${j3} / ${j4}]`;
                 } else {
-                    // Sencillos
                     const j1 = obtenerNombreJugador(p.jugador1);
                     const j2 = obtenerNombreJugador(p.jugador2);
                     textoEnfrentamiento = `${j1} <span style="color:#d4f01e;">vs</span> ${j2}`;
@@ -122,9 +115,7 @@ async function seleccionarPartidoPorId(partidoId) {
     }
 
     try {
-        // 🛠️ CORRECCIÓN: Ruta apuntando a /api/torneos/partidos/
         const response = await fetch(`/api/torneos/partidos/${partidoId}`);
-        
         let partidoActualizado;
         if (response.ok) {
             partidoActualizado = await response.json();
@@ -148,10 +139,8 @@ function seleccionarPartido(partido) {
     viewer.style.display = "block";
     viewer.scrollIntoView({ behavior: 'smooth' });
 
-    // 1. Renderiza inmediatamente con los datos EXACTOS del backend
     renderizarVisorPartido(partido);
 
-    // 2. Controlar la suscripción de WebSockets para actualización en vivo
     if (stompClient && stompClient.connected) {
         if (partidoSuscritoId) {
             stompClient.unsubscribe(`sub-${partidoSuscritoId}`);
@@ -204,7 +193,6 @@ function actualizarMarcadorEnVivoUI(data) {
     const s2Elem = document.getElementById("sets-j2");
     const estadoElem = document.getElementById("estado-partido-tag");
 
-    // 🛠️ Mapeo flexible de datos entrantes del WS
     const p1 = data.p1 ?? data.puntaje1 ?? "0";
     const p2 = data.p2 ?? data.puntaje2 ?? "0";
     const g1 = data.g1 ?? data.games1 ?? 0;
@@ -237,22 +225,40 @@ function actualizarMarcadorEnVivoUI(data) {
 }
 
 function renderizarVisorPartido(partido) {
+    console.log("🔍 DATOS COMPLETOS RECIBIDOS:", partido);
+
     const viewer = document.getElementById("match-viewer");
+
+    // Detección estricta de Dobles
+    const tieneJugador3Valido = partido.jugador3 && 
+                                (partido.jugador3.id || partido.jugador3.nombre) && 
+                                obtenerNombreJugador(partido.jugador3) !== "Por definir";
+
+    const esDobles = partido.esDobles === true || 
+                     (partido.modalidad && partido.modalidad.toUpperCase() === "DOBLES") || 
+                     tieneJugador3Valido;
 
     const nombreJ1 = obtenerNombreJugador(partido.jugador1);
     const nombreJ2 = obtenerNombreJugador(partido.jugador2);
+    const nombreJ3 = esDobles ? obtenerNombreJugador(partido.jugador3) : "";
+    const nombreJ4 = esDobles ? obtenerNombreJugador(partido.jugador4) : "";
 
-    const rawStats = partido.estadisticas || {};
+    const tituloEnfrentamiento = esDobles 
+        ? `[${nombreJ1} / ${nombreJ2}] <span style="color:#d4f01e;">VS</span> [${nombreJ3} / ${nombreJ4}]`
+        : `${nombreJ1} <span style="color:#d4f01e;">VS</span> ${nombreJ2}`;
 
-    const stats = {
-        acesJ1: rawStats.acesJ1 ?? rawStats.aces1 ?? 0,
-        acesJ2: rawStats.acesJ2 ?? rawStats.aces2 ?? 0,
-        winnersJ1: rawStats.winnersJ1 ?? rawStats.winners1 ?? 0,
-        winnersJ2: rawStats.winnersJ2 ?? rawStats.winners2 ?? 0,
-        erroresJ1: rawStats.erroresJ1 ?? rawStats.erroresNoForzadosJ1 ?? 0,
-        erroresJ2: rawStats.erroresJ2 ?? rawStats.erroresNoForzadosJ2 ?? 0,
-        doblesFaltasJ1: rawStats.doblesFaltasJ1 ?? rawStats.doblesFaltas1 ?? 0,
-        doblesFaltasJ2: rawStats.doblesFaltasJ2 ?? rawStats.doblesFaltas2 ?? 0
+    // Selección de estadísticas basada en la modalidad real
+    const rawStats = (esDobles && partido.estadisticasDobles) 
+        ? partido.estadisticasDobles 
+        : (partido.estadisticas || partido.stats || partido);
+
+    const getStat = (...keys) => {
+        for (let key of keys) {
+            if (rawStats && rawStats[key] !== undefined && rawStats[key] !== null) {
+                return Number(rawStats[key]);
+            }
+        }
+        return 0;
     };
 
     const estado = partido.estado || "PROGRAMADO";
@@ -261,7 +267,6 @@ function renderizarVisorPartido(partido) {
     const s1 = partido.setsGanadosJ1 ?? partido.setsJ1 ?? 0;
     const s2 = partido.setsGanadosJ2 ?? partido.setsJ2 ?? 0;
 
-    // 1. DEFINICIÓN DE COLORES DEL TAG DE ESTADO (Soluciona el ReferenceError)
     let colorFondo = "#6c757d"; 
     let colorTexto = "#fff";
 
@@ -273,64 +278,51 @@ function renderizarVisorPartido(partido) {
         colorTexto = "#000";
     }
 
-    // 2. Extraer datos de los Sets individuales
     const set1_j1 = partido.gamesSet1J1 ?? 0;
     const set1_j2 = partido.gamesSet1J2 ?? 0;
-
     const set2_j1 = partido.gamesSet2J1 ?? 0;
     const set2_j2 = partido.gamesSet2J2 ?? 0;
-
     const set3_j1 = partido.gamesSet3J1 ?? 0;
     const set3_j2 = partido.gamesSet3J2 ?? 0;
-
     const huboSet3 = (set3_j1 > 0 || set3_j2 > 0);
 
-    // 3. Banner para el Ganador
     let bannerGanador = "";
     if (esFinalizado) {
         let nombreGanador = partido.ganador ? obtenerNombreJugador(partido.ganador) : null;
-        
         if (!nombreGanador) {
-            if (s1 > s2) nombreGanador = nombreJ1;
-            else if (s2 > s1) nombreGanador = nombreJ2;
+            if (s1 > s2) nombreGanador = esDobles ? `[${nombreJ1} / ${nombreJ2}]` : nombreJ1;
+            else if (s2 > s1) nombreGanador = esDobles ? `[${nombreJ3} / ${nombreJ4}]` : nombreJ2;
         }
 
         if (nombreGanador) {
             bannerGanador = `
-                <div style="background: linear-gradient(90deg, #d4f01e, #8ac000); color: #000; padding: 12px 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                <div style="background: linear-gradient(90deg, #d4f01e, #8ac000); color: #000; padding: 12px 15px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;">
                     🏆 GANADOR: ${nombreGanador}
                 </div>
             `;
         }
     }
 
-    // 4. Bloque HTML del desglose de los Sets
     let HTMLDesgloseSets = "";
     if (esFinalizado) {
         HTMLDesgloseSets = `
             <div style="background: rgba(255, 255, 255, 0.03); padding: 14px; border-radius: 10px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="text-align: center; color: #d4f01e; font-weight: bold; margin-bottom: 12px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                <div style="text-align: center; color: #d4f01e; font-weight: bold; margin-bottom: 12px; font-size: 0.85rem; text-transform: uppercase;">
                     📊 Parciales del Partido
                 </div>
-                
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- Set 1 -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); padding: 8px 14px; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; background: rgba(0, 0, 0, 0.2); padding: 8px 14px; border-radius: 6px; color: #fff;">
                         <span style="color: #aaa; font-weight: bold;">Set 1</span>
-                        <span style="font-weight: bold; font-size: 1rem;">${set1_j1} - ${set1_j2}</span>
+                        <span style="font-weight: bold;">${set1_j1} - ${set1_j2}</span>
                     </div>
-
-                    <!-- Set 2 -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); padding: 8px 14px; border-radius: 6px; color: #fff; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; background: rgba(0, 0, 0, 0.2); padding: 8px 14px; border-radius: 6px; color: #fff;">
                         <span style="color: #aaa; font-weight: bold;">Set 2</span>
-                        <span style="font-weight: bold; font-size: 1rem;">${set2_j1} - ${set2_j2}</span>
+                        <span style="font-weight: bold;">${set2_j1} - ${set2_j2}</span>
                     </div>
-
-                    <!-- Super Tie-Break (Solo si se jugó) -->
                     ${huboSet3 ? `
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(212, 240, 30, 0.1); padding: 8px 14px; border-radius: 6px; border: 1px solid rgba(212, 240, 30, 0.3); color: #fff; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; background: rgba(212, 240, 30, 0.1); padding: 8px 14px; border-radius: 6px; border: 1px solid rgba(212, 240, 30, 0.3); color: #fff;">
                         <span style="color: #d4f01e; font-weight: bold;">Super Tie-Break</span>
-                        <span style="color: #d4f01e; font-weight: bold; font-size: 1.05rem;">${set3_j1} - ${set3_j2}</span>
+                        <span style="color: #d4f01e; font-weight: bold;">${set3_j1} - ${set3_j2}</span>
                     </div>
                     ` : ''}
                 </div>
@@ -339,28 +331,111 @@ function renderizarVisorPartido(partido) {
     }
 
     let setActual = s1 + s2 + 1;
-    let g1 = 0;
-    let g2 = 0;
-
-    if (setActual === 1) {
-        g1 = set1_j1;
-        g2 = set1_j2;
-    } else if (setActual === 2) {
-        g1 = set2_j1;
-        g2 = set2_j2;
-    } else {
-        g1 = set3_j1;
-        g2 = set3_j2;
-    }
+    let g1 = setActual === 1 ? set1_j1 : setActual === 2 ? set2_j1 : set3_j1;
+    let g2 = setActual === 1 ? set1_j2 : setActual === 2 ? set2_j2 : set3_j2;
 
     const p1 = partido.puntosActualesJ1 ?? partido.puntosJ1 ?? "0";
     const p2 = partido.puntosActualesJ2 ?? partido.puntosJ2 ?? "0";
 
-    // 5. Renderizado final del DOM
+    // --- SECCIÓN DE ESTADÍSTICAS ---
+    let htmlEstadisticas = "";
+
+    if (!esDobles) {
+        // Mapeo adaptado con los nombres provenientes de la API
+        const statsSencillos = {
+            acesJ1: getStat('acesJ1', 'aceJ1', 'aces_j1'),
+            acesJ2: getStat('acesJ2', 'aceJ2', 'aces_j2'),
+            winnersJ1: getStat('winnersJ1', 'winnerJ1', 'winners_j1'),
+            winnersJ2: getStat('winnersJ2', 'winnerJ2', 'winners_j2'),
+            erroresJ1: getStat('erroresNoForzadosJ1', 'erroresJ1', 'errores_j1'),
+            erroresJ2: getStat('erroresNoForzadosJ2', 'erroresJ2', 'errores_j2'),
+            doblesFaltasJ1: getStat('doblesFaltasJ1', 'dobleFaltaJ1'),
+            doblesFaltasJ2: getStat('doblesFaltasJ2', 'dobleFaltaJ2'),
+            primerFaltaJ1: getStat('primerFaltaJ1', 'primerServicioFaltaJ1'),
+            primerFaltaJ2: getStat('primerFaltaJ2', 'primerServicioFaltaJ2'),
+            errorForzadoJ1: getStat('errorForzadoJ1', 'erroresForzadosJ1'),
+            errorForzadoJ2: getStat('errorForzadoJ2', 'erroresForzadosJ2')
+        };
+
+        htmlEstadisticas = `
+            ${generarBarraStat("Aces Directos", statsSencillos.acesJ1, statsSencillos.acesJ2)}
+            ${generarBarraStat("Winners", statsSencillos.winnersJ1, statsSencillos.winnersJ2)}
+            ${generarBarraStat("Faltas 1er Servicio", statsSencillos.primerFaltaJ1, statsSencillos.primerFaltaJ2)}
+            ${generarBarraStat("Errores No Forzados", statsSencillos.erroresJ1, statsSencillos.erroresJ2)}
+            ${generarBarraStat("Errores Forzados", statsSencillos.errorForzadoJ1, statsSencillos.errorForzadoJ2)}
+            ${generarBarraStat("Dobles Faltas", statsSencillos.doblesFaltasJ1, statsSencillos.doblesFaltasJ2)}
+        `;
+    } else {
+        // Mapeo detallado por jugador coincidiendo con el JSON del backend
+        const statsIndividuales = [
+            { nombre: nombreJ1, aces: getStat('acesJ1'), winners: getStat('winnersJ1'), primerFalta: getStat('primerFaltaJ1'), errores: getStat('erroresNoForzadosJ1', 'erroresJ1'), errorForzado: getStat('errorForzadoJ1'), doblesFaltas: getStat('doblesFaltasJ1'), pareja: "Pareja 1" },
+            { nombre: nombreJ2, aces: getStat('acesJ2'), winners: getStat('winnersJ2'), primerFalta: getStat('primerFaltaJ2'), errores: getStat('erroresNoForzadosJ2', 'erroresJ2'), errorForzado: getStat('errorForzadoJ2'), doblesFaltas: getStat('doblesFaltasJ2'), pareja: "Pareja 1" },
+            { nombre: nombreJ3, aces: getStat('acesJ3'), winners: getStat('winnersJ3'), primerFalta: getStat('primerFaltaJ3'), errores: getStat('erroresNoForzadosJ3', 'erroresJ3'), errorForzado: getStat('errorForzadoJ3'), doblesFaltas: getStat('doblesFaltasJ3'), pareja: "Pareja 2" },
+            { nombre: nombreJ4, aces: getStat('acesJ4'), winners: getStat('winnersJ4'), primerFalta: getStat('primerFaltaJ4'), errores: getStat('erroresNoForzadosJ4', 'erroresJ4'), errorForzado: getStat('errorForzadoJ4'), doblesFaltas: getStat('doblesFaltasJ4'), pareja: "Pareja 2" }
+        ];
+
+        // Totales consolidados
+        const p1Aces = statsIndividuales[0].aces + statsIndividuales[1].aces;
+        const p2Aces = statsIndividuales[2].aces + statsIndividuales[3].aces;
+        
+        const p1Winners = statsIndividuales[0].winners + statsIndividuales[1].winners;
+        const p2Winners = statsIndividuales[2].winners + statsIndividuales[3].winners;
+
+        const p1PrimerFalta = statsIndividuales[0].primerFalta + statsIndividuales[1].primerFalta;
+        const p2PrimerFalta = statsIndividuales[2].primerFalta + statsIndividuales[3].primerFalta;
+
+        const p1Errores = statsIndividuales[0].errores + statsIndividuales[1].errores;
+        const p2Errores = statsIndividuales[2].errores + statsIndividuales[3].errores;
+
+        const p1ErrorForzado = statsIndividuales[0].errorForzado + statsIndividuales[1].errorForzado;
+        const p2ErrorForzado = statsIndividuales[2].errorForzado + statsIndividuales[3].errorForzado;
+
+        const p1DoblesFaltas = statsIndividuales[0].doblesFaltas + statsIndividuales[1].doblesFaltas;
+        const p2DoblesFaltas = statsIndividuales[2].doblesFaltas + statsIndividuales[3].doblesFaltas;
+
+        htmlEstadisticas = `
+            <div style="background: rgba(0,0,0,0.25); padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.08);">
+                <div style="text-align: center; color: #d4f01e; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 15px;">
+                    🎾 Resumen por Parejas
+                </div>
+                ${generarBarraStat("Aces Directos", p1Aces, p2Aces)}
+                ${generarBarraStat("Winners", p1Winners, p2Winners)}
+                ${generarBarraStat("1er Servicio Faltas", p1PrimerFalta, p2PrimerFalta)}
+                ${generarBarraStat("Errores No Forzados", p1Errores, p2Errores)}
+                ${generarBarraStat("Errores Forzados", p1ErrorForzado, p2ErrorForzado)}
+                ${generarBarraStat("Dobles Faltas", p1DoblesFaltas, p2DoblesFaltas)}
+            </div>
+
+            <div style="text-align: center; color: #aaa; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 12px;">
+                👤 Desglose Individual
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+                ${statsIndividuales.map((j, idx) => `
+                    <div style="background: ${idx < 2 ? 'rgba(212, 240, 30, 0.05)' : 'rgba(52, 152, 219, 0.05)'}; border: 1px solid ${idx < 2 ? 'rgba(212, 240, 30, 0.2)' : 'rgba(52, 152, 219, 0.2)'}; padding: 12px; border-radius: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 8px;">
+                            <span style="font-weight: bold; color: #fff; font-size: 0.95rem;">${j.nombre}</span>
+                            <span style="font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: ${idx < 2 ? '#d4f01e' : '#3498db'}; color: #000; font-weight: bold;">
+                                ${j.pareja}
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.8rem; color: #ccc;">
+                            <div>🚀 Aces: <strong style="color:#fff;">${j.aces}</strong></div>
+                            <div>⭐ Winners: <strong style="color:#fff;">${j.winners}</strong></div>
+                            <div>❌ 1er Serv. Falta: <strong style="color:#f39c12;">${j.primerFalta}</strong></div>
+                            <div>🚫 Errores N.F.: <strong style="color:#e67e22;">${j.errores}</strong></div>
+                            <div>🎯 Errores Forz.: <strong style="color:#3498db;">${j.errorForzado}</strong></div>
+                            <div>⚠️ Dobles Faltas: <strong style="color:#e74c3c;">${j.doblesFaltas}</strong></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
     viewer.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h2 style="margin:0; color:#fff;">
-                ${nombreJ1} <span style="color:#d4f01e;">VS</span> ${nombreJ2}
+            <h2 style="margin:0; color:#fff; font-size:1.3rem;">
+                ${tituloEnfrentamiento}
             </h2>
             <span id="estado-partido-tag" style="background:${colorFondo}; color:${colorTexto}; padding:6px 12px; font-weight:bold; border-radius:6px; font-size:0.85rem; text-transform:uppercase;">
                 ${estado}
@@ -371,11 +446,10 @@ function renderizarVisorPartido(partido) {
 
         <div class="vertical-scoreboard">
             <div style="display:flex; justify-content:space-around; color:#aaa; font-size:0.9rem; font-weight:bold; margin-bottom: 10px;">
-                <span>${nombreJ1}</span>
-                <span>${nombreJ2}</span>
+                <span>${esDobles ? `[${nombreJ1} / ${nombreJ2}]` : nombreJ1}</span>
+                <span>${esDobles ? `[${nombreJ3} / ${nombreJ4}]` : nombreJ2}</span>
             </div>
 
-            <!-- Sets -->
             <div class="score-row-block">
                 <span class="block-label">Sets Ganados</span>
                 <div class="block-values highlight">
@@ -385,10 +459,8 @@ function renderizarVisorPartido(partido) {
                 </div>
             </div>
 
-            <!-- Desglose por Set en partidos finalizados -->
             ${HTMLDesgloseSets}
 
-            <!-- Games en Vivo -->
             <div class="score-row-block" style="${esFinalizado ? 'display:none;' : ''}">
                 <span class="block-label">Games (Set ${setActual})</span>
                 <div class="block-values">
@@ -398,7 +470,6 @@ function renderizarVisorPartido(partido) {
                 </div>
             </div>
 
-            <!-- Puntos Actuales en Vivo -->
             <div class="score-row-block" style="${esFinalizado ? 'display:none;' : ''}">
                 <span class="block-label">Puntos Actuales</span>
                 <div class="block-values">
@@ -409,33 +480,9 @@ function renderizarVisorPartido(partido) {
             </div>
         </div>
 
-        <!-- Estadísticas -->
         <div class="stats-section" style="margin-top:20px;">
             <h3 style="color:#fff; margin-bottom:15px;"><i class="fa-solid fa-chart-simple"></i> Estadísticas del Partido</h3>
-            ${generarBarraStat("Aces / Serv. Ganadores", stats.acesJ1, stats.acesJ2)}
-            ${generarBarraStat("Tiros Ganadores (Winners)", stats.winnersJ1, stats.winnersJ2)}
-            ${generarBarraStat("Errores No Forzados", stats.erroresJ1, stats.erroresJ2)}
-            ${generarBarraStat("Dobles Faltas", stats.doblesFaltasJ1, stats.doblesFaltasJ2)}
-        </div>
-    `;
-}
-
-function crearTarjetaPartidoHTML(partido) {
-    const j1 = obtenerNombreJugador(partido.jugador1);
-    const j2 = obtenerNombreJugador(partido.jugador2);
-
-    return `
-        <div class="partido-card" onclick="seleccionarPartidoPorId(${partido.id})">
-            <div class="partido-header">
-                <span id="estado-card-${partido.id}" class="badge-estado ${partido.estado ? partido.estado.toLowerCase() : ''}">
-                    ${partido.estado || 'PROGRAMADO'}
-                </span>
-            </div>
-            <div class="partido-body">
-                <div>${j1}</div>
-                <div>vs</div>
-                <div>${j2}</div>
-            </div>
+            ${htmlEstadisticas}
         </div>
     `;
 }
