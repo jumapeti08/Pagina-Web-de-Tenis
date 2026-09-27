@@ -1,7 +1,5 @@
 package com.apptenis.demo.model;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -14,9 +12,6 @@ public class Partido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    // Agrega una columna para registrar la última interacción del juez
-    private LocalDateTime ultimaConexionJuez;
 
     // Estadísticas para Sencillos
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
